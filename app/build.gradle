@@ -1,0 +1,124 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion "${COMPILE_SDK_VERSION}" as int
+    buildToolsVersion "${BUILD_TOOLS_VERSION}"
+    flavorDimensions "2017398956"
+    // sourceSets {
+    //  main {
+    //      manifest.srcFile 'src/main/AndroidManifest.xml'
+    //      java.srcDirs = ['src/main/java']
+    //      resources.srcDirs = ['src/main/java']
+    //      res.srcDirs = ['src/main/res']
+    //      assets.srcDirs = ['src/main/assets']
+    //      jniLibs.srcDirs = ['src/main/libs']//这一行是没有的，如果我们有.so文件就需要加上这一行代码
+    //  }
+    // }
+
+    // 签名
+    signingConfigs {
+        release {
+            storeFile file('keyStore/testKeyStore.jks')
+            storePassword "123456"
+            keyAlias "testKey"
+            keyPassword "123456"
+        }
+    }
+
+    defaultConfig {
+        applicationId "personal.nfl.networkcapture"
+        minSdkVersion "${MIN_SDK_VERSION}" as int
+        targetSdkVersion "${TARGET_SDK_VERSION}" as int
+        versionCode 1
+        versionName "1.0.0"
+        // testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        // multiDexEnabled = true
+        // signingConfig signingConfigs.release
+        manifestPlaceholders = [APP_ICON: "@mipmap/ic_launcher"]
+        // ndk {
+        //     abiFilters "armeabi"
+        // }
+    }
+
+    buildTypes {
+        release {
+            // ZipAlign优化
+            zipAlignEnabled true
+            // 不显示Log(配置不正确，待测试)
+            // buildConfigField("boolean" , "LOG_DEBUG" , "false")
+            // signingConfig signingConfigs.release//不要忘了要在release的时候加入我么的签名配置信息
+            shrinkResources false // 去除无用资源 , 只有开启混淆后才能使用
+            minifyEnabled false // 混淆,由于需要配置大量第三方包，所以暂时关闭混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+        }
+        debug {
+            zipAlignEnabled true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+
+    productFlavors {
+        myTest {
+            if (true) {
+                // 如果是测试包
+                // AndroidManifest.xml 里面 APP_ICON 的 value 为 ${APP_ICON}
+                manifestPlaceholders = [APP_ICON: "@mipmap/ic_launcher"]
+                applicationId "personal.nfl.networkcapture"
+            } else {
+                manifestPlaceholders = [APP_ICON: "@mipmap/ic_launcher"]
+                // 如果是正式包
+                applicationId "personal.nfl.networkcapture"
+            }
+            // 混淆配置文件
+            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            dimension "2017398956"
+        }
+
+//        fast {
+//            // api > 21 上时会触发 dex 优化编译策略，可以加快打包速度
+//            minSdkVersion 21
+//            dimension "2017398956"
+//        }
+
+    }
+
+    //这个是解决lint报错的代码
+    lintOptions {
+        abortOnError false
+        // 防止在发布的时候出现因MissingTranslation导致Build Failed!
+        disable 'MissingTranslation'
+    }
+
+    dexOptions {
+        // incremental true
+        // jumboMode = true
+        // By default incremental is turned on Java compilation in 2.1.0-rc1 (2016/4/22) or later.
+        // So its redundant to declare it in build.gradle file.
+        // javaMaxHeapSize "4g"
+        // 解决java堆内存不够的问题，参考http://blog.csdn.net/niuzhucedenglu/article/details/51781618  第五条
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // testImplementation 'junit:junit:4.12'
+    // androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    // androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation "com.android.support:appcompat-v7:${SUPPORT}"
+    implementation "com.android.support.constraint:constraint-layout:${CONSTRAINT_LAYOUT}"
+    implementation "com.android.support:design:${SUPPORT}"
+    // implementation 'com.tencent.bugly:crashreport:2.4.0'
+    implementation project(':vpnadaptercore')
+}
