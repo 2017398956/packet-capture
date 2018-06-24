@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.common.widget;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,12 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/5.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * Fragment 基类
+ * @author nfl
  */
 
 public abstract class BaseFragment extends Fragment {
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -21,7 +21,10 @@ public abstract class BaseFragment extends Fragment {
         return layout;
     }
 
-    abstract int getLayout();
+    /**
+     * @return 返回 fragment 所需的 layout id 。
+     */
+    protected abstract int getLayout();
 
     public void onVisible() {
 

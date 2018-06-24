@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.fragment;
 
 
 import android.content.Context;
@@ -13,6 +13,10 @@ import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.activity.AboutActivity;
+import personal.nfl.networkcapture.common.util.FileUtils;
+import personal.nfl.networkcapture.common.widget.BaseFragment;
 import personal.nfl.vpn.service.FirewallVpnService;
 import personal.nfl.vpn.utils.ThreadProxy;
 import personal.nfl.vpn.VPNConstants;
@@ -21,9 +25,8 @@ import java.io.File;
 import java.io.FileFilter;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/5.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 设置界面
+ * @author nfl
  */
 
 public class SettingFragment extends BaseFragment {
@@ -39,7 +42,7 @@ public class SettingFragment extends BaseFragment {
     private boolean showUDP;
 
     @Override
-    int getLayout() {
+    protected int getLayout() {
         return R.layout.fragment_setting;
     }
 

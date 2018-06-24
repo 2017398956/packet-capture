@@ -1,15 +1,16 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import personal.nfl.networkcapture.R ;
+
+import personal.nfl.networkcapture.R;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/6.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 关于界面
+ *
+ * @author nfl
  */
 
 public class AboutActivity extends Activity {

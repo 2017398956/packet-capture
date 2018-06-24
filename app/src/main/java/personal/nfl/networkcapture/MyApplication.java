@@ -2,24 +2,33 @@ package personal.nfl.networkcapture;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDex;
 
-// import com.tencent.bugly.crashreport.CrashReport;
+import personal.nfl.networkcapture.common.util.BuglyUtil;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/4/30.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * @author nfl
  */
 
 public class MyApplication extends Application {
-    // public static final String BUGLY_ID="6c905fa4a7";
-    private static  Context context;
+    public static final String BUGLY_APP_ID = "47a443716c";
+    public static final String BUGLY_APP_KEY = "156fdd48-3b6d-4a64-9429-f7d004640b2c";
+    private static Context context;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        // CrashReport.initCrashReport(getApplicationContext(), BUGLY_ID, false);
+        context = this;
+        BuglyUtil.initBugly(context, BUGLY_APP_ID);
     }
-    public static Context getContext(){
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
+    public static Context getContext() {
         return context;
     }
 

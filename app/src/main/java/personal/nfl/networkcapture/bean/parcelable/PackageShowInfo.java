@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.bean.parcelable;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -13,15 +13,14 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/4/30.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * app 包信息
+ * @author nfl
  */
 
 public class PackageShowInfo implements Parcelable {
     private static final java.lang.String NO_APP_NAME = "COM.";
-    String appName;
-    String packageName;
+    public String appName;
+    public String packageName;
     public ApplicationInfo applicationInfo;
 
     public static List<PackageShowInfo> getPackageShowInfo(Context context) {
@@ -43,7 +42,7 @@ public class PackageShowInfo implements Parcelable {
         Collections.sort(showInfos, new Comparator<PackageShowInfo>() {
             @Override
             public int compare(PackageShowInfo o1, PackageShowInfo o2) {
-                if(o1==o2){
+                if (o1 == o2) {
                     return 0;
                 }
                 if (o1.appName == null && o2.appName == null) {
@@ -55,11 +54,11 @@ public class PackageShowInfo implements Parcelable {
                 if (o2.appName == null) {
                     return 1;
                 }
-                if (o1.appName.toUpperCase().startsWith(NO_APP_NAME)&&
+                if (o1.appName.toUpperCase().startsWith(NO_APP_NAME) &&
                         !o2.appName.toUpperCase().startsWith(NO_APP_NAME)) {
                     return 1;
                 }
-                if (!o1.appName.toUpperCase().startsWith(NO_APP_NAME)&&
+                if (!o1.appName.toUpperCase().startsWith(NO_APP_NAME) &&
                         o2.appName.toUpperCase().startsWith(NO_APP_NAME)) {
                     return -1;
                 }

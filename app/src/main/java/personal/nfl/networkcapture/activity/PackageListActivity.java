@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,14 +16,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
+import personal.nfl.networkcapture.bean.parcelable.PackageShowInfo;
+import personal.nfl.networkcapture.R;
 import personal.nfl.vpn.utils.ThreadProxy;
 
 import java.util.List;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/2/27.
- *         Copyright © 2017年 minhui.zhu. All rights reserved.
+ * app 列表界面
+ * @author nfl
  */
 
 public class PackageListActivity extends Activity {

@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.fragment;
 
 
 import android.os.Bundle;
@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import personal.nfl.networkcapture.activity.ConnectionListActivity;
+import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.common.widget.BaseFragment;
 import personal.nfl.vpn.utils.ThreadProxy;
 import personal.nfl.vpn.VPNConstants;
 
@@ -21,9 +24,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/5.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 历史界面
+ * @author nfl
  */
 
 public class HistoryFragment extends BaseFragment {
@@ -36,7 +38,7 @@ public class HistoryFragment extends BaseFragment {
     private String[] rawList;
 
     @Override
-    int getLayout() {
+    protected int getLayout() {
         return R.layout.fragment_history;
     }
 

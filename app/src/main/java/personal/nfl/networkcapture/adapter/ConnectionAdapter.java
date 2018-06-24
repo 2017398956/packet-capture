@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.adapter;
 
 import android.content.Context;
 import android.view.View;
@@ -9,12 +9,15 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import personal.nfl.networkcapture.R;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.processparse.AppInfo;
 import personal.nfl.vpn.utils.TimeFormatUtil;
 
 /**
  * 所抓 app 列表的适配器
+ *
+ * @author nfl
  */
 
 public class ConnectionAdapter extends BaseAdapter {

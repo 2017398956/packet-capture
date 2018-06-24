@@ -19,5 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+######################### Bugly 的配置 #########################
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}
+######################### Bugly 的配置 #########################

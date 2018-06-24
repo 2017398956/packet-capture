@@ -1,9 +1,7 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.cons;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/6.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 一些常量
  */
 
 public interface AppConstants {

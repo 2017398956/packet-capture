@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import personal.nfl.networkcapture.R;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.utils.ACache;
 import personal.nfl.vpn.processparse.AppInfo;
@@ -29,9 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/6.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 连接列表界面
+ * @author nfl
  */
 
 public class ConnectionListActivity extends Activity {

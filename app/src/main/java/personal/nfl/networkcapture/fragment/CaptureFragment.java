@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.fragment;
 
 
 import android.content.Context;
@@ -19,6 +19,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import personal.nfl.networkcapture.adapter.ConnectionAdapter;
+import personal.nfl.networkcapture.activity.PacketDetailActivity;
+import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.common.widget.BaseFragment;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
@@ -32,6 +36,7 @@ import static personal.nfl.vpn.VPNConstants.DEFAULT_PACKAGE_ID;
 
 /**
  * 抓包列表
+ * @author nfl
  */
 
 public class CaptureFragment extends BaseFragment {
@@ -44,7 +49,7 @@ public class CaptureFragment extends BaseFragment {
     private Context context;
 
     @Override
-    int getLayout() {
+    protected int getLayout() {
         return R.layout.fragment_capture;
     }
 
@@ -54,7 +59,7 @@ public class CaptureFragment extends BaseFragment {
         Log.d(TAG, "onViewCreated");
         context = getContext();
         channelList = view.findViewById(R.id.channel_list);
-        channelList.setOnItemClickListener();
+        channelList.setOnItemClickListener(onItemClickListener);
        /* LocalBroadcastManager.getInstance(getContext()).registerReceiver(vpnStateReceiver,
                 new IntentFilter(LocalVPNService.BROADCAST_VPN_STATE));*/
         ProxyConfig.Instance.registerVpnStatusListener(listener);
@@ -205,6 +210,6 @@ public class CaptureFragment extends BaseFragment {
                     + connection.getUniqueName();
             PacketDetailActivity.startActivity(getActivity(), dir);
         }
-    }
+    } ;
 }
 

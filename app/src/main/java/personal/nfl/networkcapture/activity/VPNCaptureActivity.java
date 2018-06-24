@@ -1,20 +1,4 @@
-/*
- ** Copyright 2015, Mohamed Naufal
- **
- ** Licensed under the Apache License, Version 2.0 (the "License");
- ** you may not use this file except in compliance with the License.
- ** You may obtain a copy of the License at
- **
- **     http://www.apache.org/licenses/LICENSE-2.0
- **
- ** Unless required by applicable law or agreed to in writing, software
- ** distributed under the License is distributed on an "AS IS" BASIS,
- ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- ** See the License for the specific language governing permissions and
- ** limitations under the License.
- */
-
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.activity;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
@@ -24,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -39,7 +22,18 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.bean.parcelable.PackageShowInfo;
+import personal.nfl.networkcapture.common.widget.BaseFragment;
+import personal.nfl.networkcapture.cons.AppConstants;
+import personal.nfl.networkcapture.fragment.CaptureFragment;
+import personal.nfl.networkcapture.fragment.HistoryFragment;
+import personal.nfl.networkcapture.fragment.SettingFragment;
 import personal.nfl.vpn.ProxyConfig;
+import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 
 import static personal.nfl.vpn.VPNConstants.DEFAULT_PACAGE_NAME;
@@ -47,38 +41,29 @@ import static personal.nfl.vpn.VPNConstants.DEFAULT_PACKAGE_ID;
 import static personal.nfl.vpn.VPNConstants.VPN_SP_NAME;
 import static personal.nfl.vpn.utils.VpnServiceHelper.START_VPN_SERVICE_REQUEST_CODE;
 
-
+/**
+ * 主界面
+ *
+ * @author nfl
+ */
 public class VPNCaptureActivity extends FragmentActivity {
 
+    private static String TAG = "VPNCaptureActivity";
     private static final int VPN_REQUEST_CODE = 101;
     private static final int REQUEST_PACKAGE = 103;
     private static final int REQUEST_STORAGE_PERMISSION = 104;
-    private static String TAG = "VPNCaptureActivity";
-
-    ProxyConfig.VpnStatusListener vpnStatusListener = new ProxyConfig.VpnStatusListener() {
-
-        @Override
-        public void onVpnStart(Context context) {
-            handler.post(() -> vpnButton.setImageResource(R.mipmap.ic_stop));
-        }
-
-        @Override
-        public void onVpnEnd(Context context) {
-            handler.post(() -> vpnButton.setImageResource(R.mipmap.ic_start));
-        }
-    };
-
-    private ImageView iv_filter_rulers, vpnButton;
-    private TextView packageId;
-    private SharedPreferences sharedPreferences;
     private String selectPackage;
     private String selectName;
-    private ArrayList<BaseFragment> baseFragments;
-    private TabLayout tabLayout;
-    private FragmentPagerAdapter simpleFragmentAdapter;
-    private ViewPager viewPager;
     private String[] needPermissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-    private Handler handler = new Handler() ;
+
+    private ImageView iv_filter_rulers, iv_vpn_switch;
+    private TextView tv_title;
+    private TabLayout tb_titles;
+    private ViewPager vp_container;
+
+    private SharedPreferences sharedPreferences;
+    private ArrayList<BaseFragment> baseFragments;
+    private FragmentPagerAdapter simpleFragmentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,21 +80,21 @@ public class VPNCaptureActivity extends FragmentActivity {
 
     private void initView() {
         iv_filter_rulers = findViewById(R.id.iv_filter_rulers);
-        vpnButton = findViewById(R.id.vpn);
-        packageId = findViewById(R.id.package_id);
+        iv_vpn_switch = findViewById(R.id.iv_vpn_switch);
+        tv_title = findViewById(R.id.tv_title);
     }
 
     private void setListeners() {
         iv_filter_rulers.setOnClickListener(onClickListener);
-        vpnButton.setOnClickListener(onClickListener);
+        iv_vpn_switch.setOnClickListener(onClickListener);
     }
 
     private void initData() {
         sharedPreferences = getSharedPreferences(VPN_SP_NAME, MODE_PRIVATE);
         selectPackage = sharedPreferences.getString(DEFAULT_PACKAGE_ID, null);
         selectName = sharedPreferences.getString(DEFAULT_PACAGE_NAME, null);
-        packageId.setText(selectName != null ? selectName : selectPackage != null ? selectPackage : getString(R.string.all));
-        vpnButton.setEnabled(true);
+        tv_title.setText(selectName != null ? selectName : selectPackage != null ? selectPackage : getString(R.string.all));
+        iv_vpn_switch.setEnabled(true);
         //推荐用户进行留评
         boolean hasFullUseApp = sharedPreferences.getBoolean(AppConstants.HAS_FULL_USE_APP, false);
         if (hasFullUseApp) {
@@ -221,20 +206,20 @@ public class VPNCaptureActivity extends FragmentActivity {
                 return baseFragments.size();
             }
         };
-        viewPager = findViewById(R.id.container_vp);
-        viewPager.setAdapter(simpleFragmentAdapter);
+        vp_container = findViewById(R.id.vp_container);
+        vp_container.setAdapter(simpleFragmentAdapter);
     }
 
     private void initTab() {
-        tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.setupWithViewPager(viewPager);
-        tabLayout.setTabMode(TabLayout.MODE_FIXED);
+        tb_titles = findViewById(R.id.tb_titles);
+        tb_titles.setupWithViewPager(vp_container);
+        tb_titles.setTabMode(TabLayout.MODE_FIXED);
         String[] tabTitle = getResources().getStringArray(R.array.tabs);
-        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = tabLayout.getTabAt(i);
+        for (int i = 0; i < tb_titles.getTabCount(); i++) {
+            TabLayout.Tab tab = tb_titles.getTabAt(i);
             tab.setText(tabTitle[i]);
         }
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tb_titles.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 
@@ -242,7 +227,7 @@ public class VPNCaptureActivity extends FragmentActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                //   viewPager.setCurrentItem(tab.getPosition());
+                //   vp_container.setCurrentItem(tab.getPosition());
             }
 
             @Override
@@ -283,7 +268,7 @@ public class VPNCaptureActivity extends FragmentActivity {
         if (requestCode == START_VPN_SERVICE_REQUEST_CODE && resultCode == RESULT_OK) {
             VpnServiceHelper.startVpnService(getApplicationContext());
         } else if (requestCode == REQUEST_PACKAGE && resultCode == RESULT_OK) {
-            PackageShowInfo showInfo = (PackageShowInfo) data.getParcelableExtra(PackageListActivity.SELECT_PACKAGE);
+            PackageShowInfo showInfo = data.getParcelableExtra(PackageListActivity.SELECT_PACKAGE);
             if (showInfo == null) {
                 selectPackage = null;
                 selectName = null;
@@ -291,9 +276,9 @@ public class VPNCaptureActivity extends FragmentActivity {
                 selectPackage = showInfo.packageName;
                 selectName = showInfo.appName;
             }
-            packageId.setText(selectName != null ? selectName :
+            tv_title.setText(selectName != null ? selectName :
                     selectPackage != null ? selectPackage : getString(R.string.all));
-            vpnButton.setEnabled(true);
+            iv_vpn_switch.setEnabled(true);
             sharedPreferences.edit().putString(DEFAULT_PACKAGE_ID, selectPackage)
                     .putString(DEFAULT_PACAGE_NAME, selectName).apply();
         }
@@ -303,7 +288,7 @@ public class VPNCaptureActivity extends FragmentActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.vpn:
+                case R.id.iv_vpn_switch:
                     if (VpnServiceHelper.vpnRunningStatus()) {
                         closeVpn();
                     } else {
@@ -315,6 +300,40 @@ public class VPNCaptureActivity extends FragmentActivity {
                     startActivityForResult(intent, REQUEST_PACKAGE);
                     break;
             }
+        }
+    };
+
+    private VpnStatusListener vpnStatusListener = new VpnStatusListener() {
+
+        private Consumer<Integer> consumer = new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                switch (integer) {
+                    case 1:
+                        iv_vpn_switch.setImageResource(R.mipmap.ic_stop);
+                        break;
+                    case 2:
+                        iv_vpn_switch.setImageResource(R.mipmap.ic_start);
+                        break;
+                }
+            }
+        };
+
+        @Override
+        public void onVpnStart(Context context) {
+            Observable
+                    .just(1)
+                    //.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
+        }
+
+        @Override
+        public void onVpnEnd(Context context) {
+            Observable
+                    .just(2)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
         }
     };
 }

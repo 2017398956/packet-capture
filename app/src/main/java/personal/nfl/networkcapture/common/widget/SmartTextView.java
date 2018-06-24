@@ -1,13 +1,12 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.common.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/9.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ *
+ * @author nfl
  */
 
 public class SmartTextView extends android.support.v7.widget.AppCompatTextView {

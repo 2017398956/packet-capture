@@ -5,36 +5,36 @@
     android:layout_height="match_parent"
     android:background="@color/white_FFFFFFFF"
     android:orientation="vertical"
-    tools:context="personal.nfl.networkcapture.VPNCaptureActivity">
+    tools:context="personal.nfl.networkcapture.activity.VPNCaptureActivity">
 
     <RelativeLayout
-        android:id="@+id/title"
+        android:id="@+id/rl_title"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/action_bar_height"
         android:background="@color/black_DBDBDB"
 
         >
 
         <ImageView
             android:id="@+id/iv_filter_rulers"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/action_bar_height"
+            android:layout_height="@dimen/action_bar_height"
             android:scaleType="center"
             android:src="@drawable/switch_device_selector" />
 
         <TextView
-            android:id="@+id/package_id"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="@dimen/action_bar_height"
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/all"
-            tools:text="腾讯" />
+            tools:text="@string/all" />
 
         <ImageView
-            android:id="@+id/vpn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/iv_vpn_switch"
+            android:layout_width="@dimen/action_bar_height"
+            android:layout_height="@dimen/action_bar_height"
             android:layout_alignParentRight="true"
             android:enabled="false"
             android:scaleType="center"
@@ -42,19 +42,19 @@
     </RelativeLayout>
 
     <android.support.design.widget.TabLayout
-        android:id="@+id/tabLayout"
+        android:id="@+id/tb_titles"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@id/title"
+        android:layout_height="@dimen/action_bar_height"
+        android:layout_below="@id/rl_title"
         android:background="@color/black_DBDBDB"
         app:tabIndicatorColor="@android:color/holo_blue_light"
         app:tabSelectedTextColor="@android:color/holo_blue_light"
         app:tabTextColor="@color/black_FF333333" />
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/container_vp"
+        android:id="@+id/vp_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tabLayout" />
+        android:layout_below="@id/tb_titles" />
 
 </RelativeLayout>

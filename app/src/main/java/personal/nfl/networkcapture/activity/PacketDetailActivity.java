@@ -1,4 +1,4 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,19 +14,21 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import personal.nfl.vpn.utils.SaveDataFileParser;
-import personal.nfl.vpn.utils.ThreadProxy;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import personal.nfl.networkcapture.cons.AppConstants;
+import personal.nfl.networkcapture.R;
+import personal.nfl.vpn.utils.SaveDataFileParser;
+import personal.nfl.vpn.utils.ThreadProxy;
+
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/3.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 抓包详情界面
+ *
+ * @author nfl
  */
 
 public class PacketDetailActivity extends Activity {

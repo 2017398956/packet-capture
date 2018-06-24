@@ -1,14 +1,22 @@
-package personal.nfl.networkcapture;
+package personal.nfl.networkcapture.common.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/6.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * 文件处理工具
+ *
+ * @author nfl
  */
 
-class FileUtils {
+public class FileUtils {
+
+    /**
+     * 删除 file 及其下的所有文件
+     *
+     * @param file
+     * @param fileFilter
+     */
     public static void deleteFile(File file, FileFilter fileFilter) {
         if (file == null) {
             return;
