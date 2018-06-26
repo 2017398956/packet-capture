@@ -1,6 +1,8 @@
 package personal.nfl.networkcapture.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.common.util.StringUtil;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.processparse.AppInfo;
 import personal.nfl.vpn.utils.TimeFormatUtil;
@@ -24,14 +27,12 @@ public class ConnectionAdapter extends BaseAdapter {
 
     private final Context context;
     private List<NatSession> netConnections;
+    private Drawable defaultDrawable;
 
     public ConnectionAdapter(Context context, List<NatSession> netConnections) {
         this.context = context;
         this.netConnections = netConnections;
-    }
-
-    public void setNetConnections(List<NatSession> netConnections) {
-        this.netConnections = netConnections;
+        this.defaultDrawable = context.getResources().getDrawable(R.drawable.sym_def_app_icon);
     }
 
     @Override
@@ -49,84 +50,51 @@ public class ConnectionAdapter extends BaseAdapter {
         return 0;
     }
 
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Holder holder;
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.item_connection, null);
             holder = new Holder(convertView);
-            convertView.setTag(holder);
         } else {
             holder = (Holder) convertView.getTag();
         }
         NatSession connection = netConnections.get(position);
-        if (connection.getAppInfo() != null) {
-            holder.processName.setText(connection.getAppInfo().leaderAppName);
-            if (connection.getAppInfo().pkgs != null) {
-                holder.icon.setImageDrawable(AppInfo.getIcon(context, connection.getAppInfo().pkgs.getAt(0)));
-            }
-        } else {
-            holder.processName.setText(context.getString(R.string.unknow));
-            holder.icon.setImageDrawable(context.getResources().getDrawable(R.drawable.sym_def_app_icon));
-        }
-        holder.isSSL.setVisibility(View.GONE);
-        holder.hostName.setText(null);
-        holder.hostName.setVisibility(View.GONE);
-        if (NatSession.TCP.equals(connection.getType())) {
-            if (connection.isHttpsSession) {
-                holder.isSSL.setVisibility(View.VISIBLE);
-            }
-
-            if (connection.getRequestUrl() != null) {
-                holder.hostName.setText(connection.getRequestUrl());
-            } else {
-                holder.hostName.setText(connection.getRemoteHost());
-            }
-            if (connection.getRequestUrl() != null || connection.getRemoteHost() != null) {
-                holder.hostName.setVisibility(View.VISIBLE);
-            }
-        }
-
-        holder.netState.setText(connection.getIpAndPort());
-        holder.refreshTime.setText(TimeFormatUtil.formatHHMMSSMM(connection.getRefreshTime()));
-        int sumByte = (int) (connection.bytesSent + connection.getReceiveByteNum());
-
-        String showSum;
-        if (sumByte > 1000000) {
-            showSum = String.valueOf((int) (sumByte / 1000000.0 + 0.5)) + "mb";
-        } else if (sumByte > 1000) {
-            showSum = String.valueOf((int) (sumByte / 1000.0 + 0.5)) + "kb";
-        } else {
-            showSum = String.valueOf(sumByte) + "b";
-        }
-
-        holder.size.setText(showSum);
-
+        holder.tv_app_name.setText(connection.getAppInfo() != null ? connection.getAppInfo().leaderAppName : context.getString(R.string.unknow));
+        holder.iv_app_icon.setImageDrawable(connection.getAppInfo() != null && connection.getAppInfo().pkgs != null ?
+                AppInfo.getIcon(context, connection.getAppInfo().pkgs.getAt(0)) : defaultDrawable);
+        holder.tv_url.setText(null);
+        boolean isTcp = NatSession.TCP.equals(connection.getType());
+        holder.tv_ssl.setVisibility(isTcp && connection.isHttpsSession ? View.VISIBLE : View.INVISIBLE);
+        holder.tv_url.setText(isTcp ?
+                (TextUtils.isEmpty(connection.getRequestUrl()) ? connection.getRemoteHost() : connection.getRequestUrl())
+                : null);
+        holder.tv_url.setVisibility(holder.tv_url.getText().length() > 0 ? View.VISIBLE : View.INVISIBLE);
+        holder.tv_net_state.setText(connection.getIpAndPort());
+        holder.tv_capture_time.setText(TimeFormatUtil.formatHHMMSSMM2(connection.getRefreshTime()));
+        holder.tv_net_size.setText(StringUtil.getSocketSize(connection.bytesSent + connection.getReceiveByteNum()));
         return convertView;
     }
 
-    class Holder {
-        ImageView icon;
-        TextView processName;
-        TextView netState;
-        TextView refreshTime;
-        TextView size;
-        TextView isSSL;
-        TextView hostName;
-        View baseView;
+    private class Holder {
+        ImageView iv_app_icon;
+        TextView tv_app_name;
+        TextView tv_net_state;
+        TextView tv_url;
+        TextView tv_capture_time;
+        TextView tv_net_size;
+        TextView tv_ssl;
 
         Holder(View view) {
-            baseView = view;
-            icon = (ImageView) view.findViewById(R.id.select_icon);
-            refreshTime = (TextView) view.findViewById(R.id.refresh_time);
-            size = (TextView) view.findViewById(R.id.net_size);
-            isSSL = (TextView) view.findViewById(R.id.is_ssl);
-            processName = (TextView) view.findViewById(R.id.app_name);
-            netState = (TextView) view.findViewById(R.id.net_state);
-            hostName = (TextView) view.findViewById(R.id.url);
+            iv_app_icon = view.findViewById(R.id.iv_app_icon);
+            tv_app_name = view.findViewById(R.id.tv_app_name);
+            tv_net_state = view.findViewById(R.id.tv_net_state);
+            tv_url = view.findViewById(R.id.tv_url);
+            tv_capture_time = view.findViewById(R.id.tv_capture_time);
+            tv_net_size = view.findViewById(R.id.tv_net_size);
+            tv_ssl = view.findViewById(R.id.tv_ssl);
+            view.setTag(this);
         }
-
     }
 
 }

@@ -12,33 +12,33 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import personal.nfl.networkcapture.MyApplication;
+
 /**
  * app 包信息
  * @author nfl
  */
 
 public class PackageShowInfo implements Parcelable {
-    private static final java.lang.String NO_APP_NAME = "COM.";
+
+    private static final String NO_APP_NAME = "COM.";
     public String appName;
     public String packageName;
     public ApplicationInfo applicationInfo;
 
-    public static List<PackageShowInfo> getPackageShowInfo(Context context) {
+    public static List<PackageShowInfo> getPackageShowInfo() {
         ArrayList<PackageShowInfo> showInfos = new ArrayList<>();
-        PackageManager packageManager = context.getPackageManager();
+        PackageManager packageManager = MyApplication.getContext().getPackageManager();
         List<PackageInfo> installedPackages = packageManager.getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES);
-
+        PackageShowInfo packageShowInfo ;
         for (PackageInfo info : installedPackages) {
-            PackageShowInfo packageShowInfo = new PackageShowInfo();
+            packageShowInfo = new PackageShowInfo();
             packageShowInfo.packageName = info.packageName;
-
             packageShowInfo.appName = (String) info.applicationInfo.loadLabel(packageManager);
-
             packageShowInfo.applicationInfo = info.applicationInfo;
             showInfos.add(packageShowInfo);
-
         }
-
+        // 对安装的 app 进行排序
         Collections.sort(showInfos, new Comparator<PackageShowInfo>() {
             @Override
             public int compare(PackageShowInfo o1, PackageShowInfo o2) {
@@ -65,7 +65,6 @@ public class PackageShowInfo implements Parcelable {
                 return o1.appName.toUpperCase().compareTo(o2.appName.toUpperCase());
             }
         });
-
         return showInfos;
     }
 

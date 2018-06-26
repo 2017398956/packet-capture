@@ -2,100 +2,82 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_btn"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp">
 
-    <RelativeLayout
+
+    <ImageView
+        android:id="@+id/iv_app_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        tools:src="@drawable/sym_def_app_icon" />
+
+
+    <TextView
+        android:id="@+id/tv_capture_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        tools:text="12:28:21.000" />
+
+    <TextView
+        android:id="@+id/tv_net_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/tv_capture_time"
+        android:layout_marginTop="2dp"
+        tools:text="1kb" />
+
+    <TextView
+        android:id="@+id/tv_ssl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/tv_net_size"
+        android:layout_marginTop="2dp"
+        android:text="@string/ssl"
+        android:textColor="@android:color/holo_red_light"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/tv_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_toRightOf="@id/iv_app_icon"
+        tools:text="未知应用" />
+
+    <TextView
+        android:id="@+id/tv_net_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_app_name"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
+        android:layout_toRightOf="@id/iv_app_icon"
+        android:singleLine="true"
+        tools:text="TCP:112.211.43.12:8080 2323" />
+
+    <TextView
+        android:id="@+id/tv_url"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@drawable/bg_btn"
-        >
-
-        <ImageView
-            android:id="@+id/select_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-
-            tools:src="@drawable/sym_def_app_icon" />
-
-        <RelativeLayout
-            android:id="@+id/name_container"
-            android:layout_width="140dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_alignParentEnd="true"
-            >
-
-            <TextView
-                android:id="@+id/refresh_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:layout_alignParentEnd="true"
-                tools:text="04-30 12:28:21" />
-            <TextView
-                android:id="@+id/net_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:layout_below="@id/refresh_time"
-                android:layout_alignParentEnd="true"
-                tools:text="1 kb" />
-            <TextView
-                android:id="@+id/is_ssl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:layout_alignParentEnd="true"
-                android:layout_below="@id/net_size"
-
-                android:textColor="@android:color/holo_red_light"
-                android:text="@string/ssl" />
-        </RelativeLayout>
-        <RelativeLayout
-            android:id="@+id/net_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@id/select_icon">
-
-            <TextView
-                android:id="@+id/app_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:gravity="center"
-                android:textSize="20sp"
-                tools:text="qq" />
-            <TextView
-                android:id="@+id/net_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="14sp"
-                android:layout_below="@id/app_name"
-                android:singleLine="true"
-                tools:text="TCP:112.211.43.12:8080 2323" />
-            <TextView
-                android:id="@+id/url"
-                android:layout_width="250dp"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:visibility="gone"
-                android:textSize="16sp"
-                android:layout_below="@id/net_state"
-                android:singleLine="true"
-                tools:text="http://baidu.com/xxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxx" />
-        </RelativeLayout>
-
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_net_state"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
+        android:layout_toLeftOf="@id/tv_ssl"
+        android:layout_toRightOf="@id/iv_app_icon"
+        android:singleLine="true"
+        android:visibility="invisible"
+        tools:text="http://www/xxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxx" />
 
 </RelativeLayout>

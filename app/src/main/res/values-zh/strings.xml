@@ -32,4 +32,5 @@
     <string name="no_data">数据不存在!!</string>
     <string name="show_udp">显示UDP数据</string>
     <string name="save_udp">保存UDP数据</string>
+    <string name="socket_detail">详情</string>
 </resources>

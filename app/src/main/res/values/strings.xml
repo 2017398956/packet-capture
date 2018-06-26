@@ -31,4 +31,5 @@
     <string name="no_data">Data not existed!!</string>
     <string name="show_udp">Show UDP</string>
     <string name="save_udp">Save UDP Packet</string>
+    <string name="socket_detail">Socket Detail</string>
 </resources>

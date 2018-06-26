@@ -99,7 +99,6 @@ public class VpnServiceHelper {
             String[] list = file.list();
             ArrayList<NatSession> baseNetSessions = new ArrayList<>();
             if(list!=null){
-
                 for (String fileName : list) {
                     NatSession netConnection = (NatSession) aCache.getAsObject(fileName);
                     baseNetSessions.add(netConnection);
@@ -118,7 +117,6 @@ public class VpnServiceHelper {
         }catch (Exception e){
             return null;
         }
-
     }
     public static void startVpnService(Context context) {
         if (context == null) {
