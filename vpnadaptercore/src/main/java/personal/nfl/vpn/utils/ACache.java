@@ -1,11 +1,15 @@
 package personal.nfl.vpn.utils;
 
-/**
- * @author minhui.zhu
- * Created by minhui.zhu on 2018/5/5.
- * Copyright © 2017年 Oceanwing. All rights reserved.
- */
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,23 +32,19 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-
+/**
+ * @author nfl
+ */
 public class ACache {
+
     public static final int TIME_HOUR = 60 * 60;
     public static final int TIME_DAY = TIME_HOUR * 24;
-    private static final int MAX_SIZE = 1000 * 1000 * 50; // 50 mb
-    private static final int MAX_COUNT = Integer.MAX_VALUE; // ä¸é™åˆ¶å­˜æ”¾æ•°æ®çš„æ•°é‡
-    private static Map<String, ACache> mInstanceMap = new HashMap<String, ACache>();
+    /**
+     * 50 mb
+     */
+    private static final int MAX_SIZE = 1000 * 1000 * 50;
+    private static final int MAX_COUNT = Integer.MAX_VALUE;
+    private static Map<String, ACache> mInstanceMap = new HashMap<>();
     private ACacheManager mCache;
 
     public static ACache get(Context ctx) {
@@ -116,8 +116,9 @@ public class ACache {
 
     public String getAsString(String key) {
         File file = mCache.get(key);
-        if (!file.exists())
+        if (!file.exists()) {
             return null;
+        }
         boolean removeFile = false;
         BufferedReader in = null;
         try {
@@ -223,8 +224,9 @@ public class ACache {
         boolean removeFile = false;
         try {
             File file = mCache.get(key);
-            if (!file.exists())
+            if (!file.exists()) {
                 return null;
+            }
             RAFile = new RandomAccessFile(file, "r");
             byte[] byteArray = new byte[(int) RAFile.length()];
             RAFile.read(byteArray);
@@ -245,8 +247,9 @@ public class ACache {
                     e.printStackTrace();
                 }
             }
-            if (removeFile)
+            if (removeFile) {
                 remove(key);
+            }
         }
     }
 
@@ -278,8 +281,12 @@ public class ACache {
         }
     }
 
-    public Object getAsObject(String key) {
-        byte[] data = getAsBinary(key);
+    /**
+     * @param fileName
+     * @return
+     */
+    public Object getAsObject(String fileName) {
+        byte[] data = getAsBinary(fileName);
         if (data != null) {
             ByteArrayInputStream bais = null;
             ObjectInputStream ois = null;
@@ -293,21 +300,22 @@ public class ACache {
                 return null;
             } finally {
                 try {
-                    if (bais != null)
+                    if (bais != null) {
                         bais.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 try {
-                    if (ois != null)
+                    if (ois != null) {
                         ois.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
         return null;
-
     }
 
     public Boolean getAsBoolean(String key, Boolean defaultBoolean) {
@@ -455,17 +463,28 @@ public class ACache {
             lastUsageDates.put(file, currentTime);
         }
 
-        private File get(String key) {
-            File file = newFile(key);
+        /**
+         * 获得文件名为 fileName 的文件，修改完该文件的“最终修改时间”后将其保存在 lastUsageDates 中；
+         *
+         * @param fileName
+         * @return
+         */
+        private File get(String fileName) {
+            File file = newFile(fileName);
             Long currentTime = System.currentTimeMillis();
             file.setLastModified(currentTime);
             lastUsageDates.put(file, currentTime);
-
             return file;
         }
 
-        private File newFile(String key) {
-            return new File(cacheDir, key);
+        /**
+         * 在 cacheDir 目录下创建名为 fileName 的文件。
+         *
+         * @param fileName
+         * @return
+         */
+        private File newFile(String fileName) {
+            return new File(cacheDir, fileName);
         }
 
         private boolean remove(String key) {
@@ -521,7 +540,6 @@ public class ACache {
     }
 
     private static class Utils {
-
 
         private static boolean isDue(String str) {
             return isDue(str.getBytes());
@@ -599,8 +617,9 @@ public class ACache {
 
         private static byte[] copyOfRange(byte[] original, int from, int to) {
             int newLength = to - from;
-            if (newLength < 0)
+            if (newLength < 0) {
                 throw new IllegalArgumentException(from + " > " + to);
+            }
             byte[] copy = new byte[newLength];
             System.arraycopy(original, from, copy, 0,
                     Math.min(original.length - from, newLength));

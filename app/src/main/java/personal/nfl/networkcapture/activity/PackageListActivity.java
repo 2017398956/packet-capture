@@ -45,8 +45,8 @@ public class PackageListActivity extends BaseActivity {
         setContentView(R.layout.activity_package_list);
         initView();
         initData();
-        getPackagesInfo();
         setListener();
+        getPackagesInfo();
     }
 
     private void initView() {
@@ -60,6 +60,14 @@ public class PackageListActivity extends BaseActivity {
     }
 
     private void getPackagesInfo() {
+        data.clear();
+        data.addAll(PackageShowInfo.getPackageShowInfo());
+        adapter.notifyDataSetChanged();
+        pg.setVisibility(View.GONE);
+        if(true){
+            return;
+        }
+        // TODO 使用 Rxjava2 实现
         Observable
                 .create(new ObservableOnSubscribe<Integer>() {
                     @Override

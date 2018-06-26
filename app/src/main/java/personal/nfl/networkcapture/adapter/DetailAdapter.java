@@ -13,6 +13,9 @@ import java.util.List;
 import personal.nfl.networkcapture.R;
 import personal.nfl.vpn.utils.SaveDataFileParser;
 
+/**
+ * @author nfl
+ */
 public class DetailAdapter extends BaseAdapter {
 
     private Context context;

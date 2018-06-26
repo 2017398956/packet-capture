@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import personal.nfl.networkcapture.common.util.BaseActivityLifecycleCallbacks;
 import personal.nfl.networkcapture.common.util.BuglyUtil;
 
 /**
@@ -20,6 +21,7 @@ public class MyApplication extends Application {
         super.onCreate();
         context = this;
         BuglyUtil.initBugly(context, BUGLY_APP_ID);
+        registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks());
     }
 
     @Override

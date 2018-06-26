@@ -13,6 +13,9 @@ import java.util.List;
 import personal.nfl.networkcapture.R;
 import personal.nfl.networkcapture.bean.parcelable.PackageShowInfo;
 
+/**
+ * @author nfl
+ */
 public class ShowPackageAdapter extends BaseAdapter {
 
     private Context context;

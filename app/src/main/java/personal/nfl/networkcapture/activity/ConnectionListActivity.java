@@ -35,7 +35,6 @@ public class ConnectionListActivity extends BaseActivity {
 
     public static final String FILE_DIRNAME = "file_dirname";
     private String fileDir;
-    private Handler handler = new Handler();
     private ListView lv_apps;
     private ConnectionAdapter adapter;
     private List<NatSession> data = new ArrayList<>();
@@ -48,14 +47,14 @@ public class ConnectionListActivity extends BaseActivity {
         lv_apps = findViewById(R.id.lv_apps);
         fileDir = getIntent().getStringExtra(FILE_DIRNAME);
         adapter = new ConnectionAdapter(this, data);
-        lv_apps.setAdapter(adapter);
-        getDataAndRefreshView();
         lv_apps.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 startPacketDetailActivity(data.get(position));
             }
         });
+        lv_apps.setAdapter(adapter);
+        getDataAndRefreshView();
     }
 
     private void getDataAndRefreshView() {
@@ -78,20 +77,16 @@ public class ConnectionListActivity extends BaseActivity {
                     }
                     Collections.sort(data, new NatSession.NatSesionComparator());
                 }
-                refreshView();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                        changeNoDataView(data);
+                    }
+                });
             }
         });
 
-    }
-
-    private void refreshView() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-                changeNoDataView(data);
-            }
-        });
     }
 
     public static void openActivity(Activity activity, String dir) {

@@ -94,7 +94,7 @@ public class VpnServiceHelper {
             return null;
         }
         try {
-            File file = new File(VPNConstants.CONFIG_DIR +FirewallVpnService. lastVpnStartTimeFormat);
+            File file = new File(VPNConstants.CONFIG_DIR + FirewallVpnService.lastVpnStartTimeFormat);
             ACache aCache = ACache.get(file);
             String[] list = file.list();
             ArrayList<NatSession> baseNetSessions = new ArrayList<>();
