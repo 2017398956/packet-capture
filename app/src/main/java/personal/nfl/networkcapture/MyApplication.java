@@ -6,6 +6,7 @@ import android.support.multidex.MultiDex;
 
 import personal.nfl.networkcapture.common.util.BaseActivityLifecycleCallbacks;
 import personal.nfl.networkcapture.common.util.BuglyUtil;
+import personal.nfl.networkcapture.common.util.PackageUtil;
 
 /**
  * @author nfl
@@ -22,6 +23,14 @@ public class MyApplication extends Application {
         context = this;
         BuglyUtil.initBugly(context, BUGLY_APP_ID);
         registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks());
+        // 获取当前包名
+        String packageName = getPackageName();
+        // 获取当前进程名
+        String processName = PackageUtil.getProcessName(android.os.Process.myPid());
+        if(processName == null || processName.equals(packageName)){
+            // 主进程
+            // TODO 只有在主进程中才使用 vpn 服务
+        }
     }
 
     @Override

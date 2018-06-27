@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -31,7 +32,8 @@ import personal.nfl.vpn.utils.ThreadProxy;
 public class PacketDetailActivity extends BaseActivity {
     public static final String CONVERSATION_DATA = "conversation_data";
     private static final String TAG = "PacketDetailActivity";
-    private String dir;
+    // 包数据的存放路径
+    private String socketDataDir;
     private SharedPreferences sp;
     private ProgressBar pg;
     private ListView lv_detail;
@@ -47,7 +49,7 @@ public class PacketDetailActivity extends BaseActivity {
         adapter = new DetailAdapter(context, data);
         lv_detail.setAdapter(adapter);
         pg = findViewById(R.id.pg);
-        dir = getIntent().getStringExtra(CONVERSATION_DATA);
+        socketDataDir = getIntent().getStringExtra(CONVERSATION_DATA);
         sp = getSharedPreferences(AppConstants.DATA_SAVE, MODE_PRIVATE);
         sp.edit().putBoolean(AppConstants.HAS_FULL_USE_APP, true).apply();
         refreshView();
@@ -58,9 +60,9 @@ public class PacketDetailActivity extends BaseActivity {
             @Override
             public void run() {
                 data.clear();
-                File file = new File(dir);
+                File file = new File(socketDataDir);
                 File[] files = file.listFiles();
-                if (files != null || files.length > 0) {
+                if (files != null && files.length > 0) {
                     List<File> filesList = new ArrayList<>();
                     for (File childFile : files) {
                         filesList.add(childFile);
@@ -84,6 +86,7 @@ public class PacketDetailActivity extends BaseActivity {
                     public void run() {
                         adapter.notifyDataSetChanged();
                         pg.setVisibility(View.GONE);
+                        changeNoDataView(data);
                     }
                 });
             }

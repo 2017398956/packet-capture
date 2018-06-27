@@ -1,7 +1,6 @@
 package personal.nfl.networkcapture.activity;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -56,18 +55,9 @@ public class PackageListActivity extends BaseActivity {
 
     private void initData() {
         adapter = new ShowPackageAdapter(this, data);
-        packageListView.setAdapter(adapter);
     }
 
     private void getPackagesInfo() {
-        data.clear();
-        data.addAll(PackageShowInfo.getPackageShowInfo());
-        adapter.notifyDataSetChanged();
-        pg.setVisibility(View.GONE);
-        if(true){
-            return;
-        }
-        // TODO 使用 Rxjava2 实现
         Observable
                 .create(new ObservableOnSubscribe<Integer>() {
                     @Override
@@ -84,7 +74,7 @@ public class PackageListActivity extends BaseActivity {
                     @Override
                     public void accept(Integer integer) throws Exception {
                         if (integer == 1) {
-                            adapter.notifyDataSetChanged();
+                            packageListView.setAdapter(adapter);
                             pg.setVisibility(View.GONE);
                         }
                     }

@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class VpnServiceHelper {
 
-    static Context context;
+    private static Context context;
     public static final int START_VPN_SERVICE_REQUEST_CODE = 2015;
     private static FirewallVpnService sVpnService;
     private static SharedPreferences sp;
@@ -37,11 +37,6 @@ public class VpnServiceHelper {
 
     public static void onVpnServiceDestroy() {
         sVpnService = null;
-    }
-
-
-    public static Context getContext() {
-        return context;
     }
 
     public static boolean isUDPDataNeedSave() {
@@ -122,7 +117,10 @@ public class VpnServiceHelper {
         if (context == null) {
             return;
         }
-
         context.startService(new Intent(context, FirewallVpnService.class));
+    }
+
+    public static Context getContext() {
+        return context;
     }
 }
