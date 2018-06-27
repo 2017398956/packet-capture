@@ -10,19 +10,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by zengzheying on 15/12/29.
+ *
+ * @author nfl
  * NAT管理对象
  */
 public class NatSessionManager {
+
     /**
      * 会话保存的最大个数
      */
-
     static final int MAX_SESSION_COUNT = 64;
     /**
      * 会话保存时间
      */
-
     private static final long SESSION_TIME_OUT_NS = 60 * 1000L;
     private static final ConcurrentHashMap<Short, NatSession> sessions = new ConcurrentHashMap<>();
 

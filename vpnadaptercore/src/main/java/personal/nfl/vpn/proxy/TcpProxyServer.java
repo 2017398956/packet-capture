@@ -1,7 +1,14 @@
 package personal.nfl.vpn.proxy;
 
 
-import android.os.Parcelable;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 
 import personal.nfl.vpn.KeyHandler;
 import personal.nfl.vpn.VPNLog;
@@ -12,17 +19,10 @@ import personal.nfl.vpn.tunnel.TunnelFactory;
 import personal.nfl.vpn.utils.AppDebug;
 import personal.nfl.vpn.utils.DebugLog;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
-
 /**
  * TCP 代理服务
+ *
+ * @author nfl
  */
 public class TcpProxyServer implements Runnable {
 

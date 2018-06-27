@@ -7,7 +7,9 @@ import personal.nfl.vpn.utils.CommonMethods;
 import java.io.Serializable;
 
 /**
- * Created by zengzheying on 15/12/29.
+ *
+ * @author zengzheying
+ * @date 15/12/29
  */
 public class NatSession implements Serializable {
     public static final String TCP = "TCP";
