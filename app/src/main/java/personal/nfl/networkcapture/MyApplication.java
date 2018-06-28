@@ -21,6 +21,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         context = this;
+        PackageUtil.test(this);
         BuglyUtil.initBugly(context, BUGLY_APP_ID);
         registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks());
         // 获取当前包名
