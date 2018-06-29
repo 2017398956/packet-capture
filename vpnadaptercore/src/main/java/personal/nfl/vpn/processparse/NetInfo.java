@@ -1,5 +1,8 @@
 package personal.nfl.vpn.processparse;
 
+/**
+ * @author fuli.niu
+ */
 public class NetInfo {
 
     private int uid;

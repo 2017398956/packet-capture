@@ -3,6 +3,7 @@ package personal.nfl.networkcapture.adapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -59,20 +60,21 @@ public class ConnectionAdapter extends BaseAdapter {
         } else {
             holder = (Holder) convertView.getTag();
         }
-        NatSession connection = netConnections.get(position);
-        holder.tv_app_name.setText(connection.getAppInfo() != null ? connection.getAppInfo().leaderAppName : context.getString(R.string.unknow));
-        holder.iv_app_icon.setImageDrawable(connection.getAppInfo() != null && connection.getAppInfo().pkgs != null ?
-                AppInfo.getIcon(context, connection.getAppInfo().pkgs.getAt(0)) : defaultDrawable);
+        NatSession natSession = netConnections.get(position);
+        Log.e("NFL" , natSession.appInfo == null ? "appInfo 是空" : ("appInfo:" + natSession.appInfo.toString())) ;
+        holder.tv_app_name.setText(natSession.getAppInfo() != null ? natSession.getAppInfo().leaderAppName : context.getString(R.string.unknow));
+        holder.iv_app_icon.setImageDrawable(natSession.getAppInfo() != null && natSession.getAppInfo().pkgs != null ?
+                AppInfo.getIcon(context, natSession.getAppInfo().pkgs.getAt(0)) : defaultDrawable);
         holder.tv_url.setText(null);
-        boolean isTcp = NatSession.TCP.equals(connection.getType());
-        holder.tv_ssl.setVisibility(isTcp && connection.isHttpsSession ? View.VISIBLE : View.INVISIBLE);
+        boolean isTcp = NatSession.TCP.equals(natSession.getType());
+        holder.tv_ssl.setVisibility(isTcp && natSession.isHttpsSession ? View.VISIBLE : View.INVISIBLE);
         holder.tv_url.setText(isTcp ?
-                (TextUtils.isEmpty(connection.getRequestUrl()) ? connection.getRemoteHost() : connection.getRequestUrl())
+                (TextUtils.isEmpty(natSession.getRequestUrl()) ? natSession.getRemoteHost() : natSession.getRequestUrl())
                 : null);
         holder.tv_url.setVisibility(holder.tv_url.getText().length() > 0 ? View.VISIBLE : View.INVISIBLE);
-        holder.tv_net_state.setText(connection.getIpAndPort());
-        holder.tv_capture_time.setText(TimeFormatUtil.formatHHMMSSMM2(connection.getRefreshTime()));
-        holder.tv_net_size.setText(StringUtil.getSocketSize(connection.bytesSent + connection.getReceiveByteNum()));
+        holder.tv_net_state.setText(natSession.getIpAndPort());
+        holder.tv_capture_time.setText(TimeFormatUtil.formatHHMMSSMM2(natSession.getRefreshTime()));
+        holder.tv_net_size.setText(StringUtil.getSocketSize(natSession.bytesSent + natSession.getReceiveByteNum()));
         return convertView;
     }
 

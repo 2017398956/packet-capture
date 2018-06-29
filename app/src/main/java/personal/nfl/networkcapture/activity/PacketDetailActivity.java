@@ -47,7 +47,7 @@ public class PacketDetailActivity extends BaseActivity {
         setActionBarTitle(R.string.socket_detail);
         lv_detail = findViewById(R.id.lv_detail);
         adapter = new DetailAdapter(context, data);
-        lv_detail.setAdapter(adapter);
+//        lv_detail.setAdapter(adapter);
         pg = findViewById(R.id.pg);
         socketDataDir = getIntent().getStringExtra(CONVERSATION_DATA);
         sp = getSharedPreferences(AppConstants.DATA_SAVE, MODE_PRIVATE);
@@ -84,7 +84,8 @@ public class PacketDetailActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        adapter.notifyDataSetChanged();
+                        lv_detail.setAdapter(adapter);
+//                        adapter.notifyDataSetChanged();
                         pg.setVisibility(View.GONE);
                         changeNoDataView(data);
                     }

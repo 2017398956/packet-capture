@@ -133,4 +133,6 @@ dependencies {
     implementation project(':vpnadaptercore')
     // implementation "io.reactivex.rxjava2:rxjava:${RX_JAVA2}"
     implementation "io.reactivex.rxjava2:rxandroid:${RX_ANDROID}"
+    implementation "com.squareup.retrofit2:retrofit:${RETROFIT}"
+    implementation "com.squareup.retrofit2:converter-gson:${RETROFIT}"
 }

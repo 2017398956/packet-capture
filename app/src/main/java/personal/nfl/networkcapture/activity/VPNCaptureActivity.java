@@ -16,13 +16,17 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import personal.nfl.networkcapture.R;
+import personal.nfl.networkcapture.bean.Repo;
 import personal.nfl.networkcapture.bean.parcelable.PackageShowInfo;
 import personal.nfl.networkcapture.common.widget.BaseActivity;
 import personal.nfl.networkcapture.common.widget.BaseFragment;
@@ -30,9 +34,16 @@ import personal.nfl.networkcapture.cons.AppConstants;
 import personal.nfl.networkcapture.fragment.CaptureFragment;
 import personal.nfl.networkcapture.fragment.HistoryFragment;
 import personal.nfl.networkcapture.fragment.SettingFragment;
+import personal.nfl.networkcapture.retrofitserver.GitHubService;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
+import personal.nfl.vpn.processparse.NetFileManager;
 import personal.nfl.vpn.utils.VpnServiceHelper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static personal.nfl.vpn.VPNConstants.DEFAULT_PACAGE_NAME;
 import static personal.nfl.vpn.VPNConstants.DEFAULT_PACKAGE_ID;
@@ -71,6 +82,28 @@ public class VPNCaptureActivity extends BaseActivity {
         initChildFragment();
         initViewPager();
         initTab();
+        // testRetrofit();
+    }
+
+    private void testRetrofit() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        GitHubService service = retrofit.create(GitHubService.class);
+        Call<List<Repo>> call = service.listRepos("octocat");
+        call.enqueue(new Callback<List<Repo>>() {
+                         @Override
+                         public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
+                             Toast.makeText(VPNCaptureActivity.this, "----", Toast.LENGTH_SHORT).show();
+                         }
+
+                         @Override
+                         public void onFailure(Call<List<Repo>> call, Throwable t) {
+                             Toast.makeText(VPNCaptureActivity.this, "====", Toast.LENGTH_SHORT).show();
+                         }
+                     }
+        );
     }
 
     private void setListeners() {
@@ -79,6 +112,7 @@ public class VPNCaptureActivity extends BaseActivity {
         iv_menu_01.setVisibility(View.VISIBLE);
         iv_back.setOnClickListener(onClickListener);
         iv_menu_01.setOnClickListener(onClickListener);
+        tv_title.setOnClickListener(onClickListener);
     }
 
     private void initData() {
@@ -256,9 +290,9 @@ public class VPNCaptureActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK){
-            switch (requestCode){
-                case START_VPN_SERVICE_REQUEST_CODE :
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case START_VPN_SERVICE_REQUEST_CODE:
                     VpnServiceHelper.startVpnService(getApplicationContext());
                     break;
                 case REQUEST_PACKAGE:// 选择特定的 app 来抓包
@@ -272,7 +306,7 @@ public class VPNCaptureActivity extends BaseActivity {
                     }
                     tv_title.setText(selectName != null ? selectName : selectPackage != null ? selectPackage : getString(R.string.all));
                     // 将选择要抓包的 app 信息保存到 sp 中
-                    sharedPreferences.edit().putString(DEFAULT_PACKAGE_ID, selectPackage).putString(DEFAULT_PACAGE_NAME, selectName).commit() ;
+                    sharedPreferences.edit().putString(DEFAULT_PACKAGE_ID, selectPackage).putString(DEFAULT_PACAGE_NAME, selectName).commit();
                     // TODO 重启 vpn
                     break;
             }
@@ -283,6 +317,8 @@ public class VPNCaptureActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
+                case R.id.tv_title:
+                    break;
                 case R.id.iv_menu_01:
                     if (VpnServiceHelper.vpnRunningStatus()) {
                         closeVpn();

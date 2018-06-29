@@ -34,7 +34,7 @@ public class PortHostService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        NetFileManager.getInstance().init(getApplicationContext());
+        NetFileManager.getInstance().init();
         instance = this;
     }
 

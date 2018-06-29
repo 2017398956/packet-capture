@@ -17,6 +17,7 @@ import java.util.Comparator;
 
 /**
  * App 信息
+ * @author nfl
  */
 
 public class AppInfo implements Serializable {
@@ -140,5 +141,26 @@ public class AppInfo implements Serializable {
             }
         }
         return drawable;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer stringBuffer = new StringBuffer() ;
+        stringBuffer.append("{\"allAppName\":").append("\"").append(allAppName).append("\",")
+                .append("\"leaderAppName\":").append("\"").append(leaderAppName).append("\"");
+        if(pkgs != null && pkgs.pkgs != null && pkgs.pkgs.length > 0){
+            stringBuffer.append(",") ;
+            for(int i = 0 ; i < pkgs.pkgs.length ; i++){
+                stringBuffer.append("\"").append(i).append("\":").append("\"").append(pkgs.pkgs[i]).append("\"") ;
+                if(i == pkgs.pkgs.length - 1){
+                    stringBuffer.append("}") ;
+                }else {
+                    stringBuffer.append(",") ;
+                }
+            }
+        }else {
+            stringBuffer.append("}") ;
+        }
+        return stringBuffer.toString() ;
     }
 }

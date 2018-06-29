@@ -3,8 +3,6 @@ package personal.nfl.networkcapture.common.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.provider.Contacts;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,7 +16,7 @@ import java.util.List;
  * @author nfl
  */
 public class PackageUtil {
-    private static final String TAG = "PackageUtil" ;
+    private static final String TAG = "PackageUtil";
 
     /**
      * 获取进程号对应的进程名
@@ -59,4 +57,5 @@ public class PackageUtil {
             );
         }
     }
+
 }
