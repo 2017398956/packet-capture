@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
- * @author nfl
+ * @author nfl.
  * NAT管理对象
  */
 public class NatSessionManager {

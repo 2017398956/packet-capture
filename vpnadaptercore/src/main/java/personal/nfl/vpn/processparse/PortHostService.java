@@ -6,17 +6,17 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import java.util.List;
+
 import personal.nfl.vpn.VPNLog;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.nat.NatSessionManager;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 
-import java.util.List;
-
 /**
  * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/5.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * Created by minhui.zhu on 2018/5/5.
+ * Copyright © 2017年 Oceanwing. All rights reserved.
  */
 
 public class PortHostService extends Service {
@@ -52,15 +52,11 @@ public class PortHostService extends Service {
         List<NatSession> allSession = NatSessionManager.getAllSession();
         refreshSessionInfo(allSession);
         return allSession;
-
     }
 
     public void refreshSessionInfo() {
-
         List<NatSession> allSession = NatSessionManager.getAllSession();
         refreshSessionInfo(allSession);
-
-
     }
 
     private void refreshSessionInfo(List<NatSession> netConnections) {
@@ -93,7 +89,7 @@ public class PortHostService extends Service {
                 }
             }
         } catch (Exception e) {
-            VPNLog.d(TAG,"failed to refreshSessionInfo "+e.getMessage());
+            VPNLog.d(TAG, "failed to refreshSessionInfo " + e.getMessage());
 
         }
 
