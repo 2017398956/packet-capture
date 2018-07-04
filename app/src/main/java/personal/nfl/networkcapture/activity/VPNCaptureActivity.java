@@ -295,7 +295,8 @@ public class VPNCaptureActivity extends BaseActivity {
                 case START_VPN_SERVICE_REQUEST_CODE:
                     VpnServiceHelper.startVpnService(getApplicationContext());
                     break;
-                case REQUEST_PACKAGE:// 选择特定的 app 来抓包
+                // 选择特定的 app 来抓包
+                case REQUEST_PACKAGE:
                     PackageShowInfo showInfo = data.getParcelableExtra(PackageListActivity.SELECT_PACKAGE);
                     if (showInfo == null) {
                         selectPackage = null;

@@ -78,6 +78,11 @@ public class FirewallVpnService extends VpnService implements Runnable {
      * 用于标记新创建的 Vpn 服务
      */
     private static int ID;
+
+    /**
+     * 用来保存一个 ip 数据包
+     */
+    private byte[] mPacket;
     /**
      * IP 报文格式
      */
@@ -99,13 +104,14 @@ public class FirewallVpnService extends VpnService implements Runnable {
      */
     private UDPServer udpServer;
     private final ByteBuffer mDNSBuffer;
+    /**
+     * VPNService 是否再运行
+     */
     private boolean IsRunning = false;
     private Thread mVPNThread;
     // private DnsProxy mDnsProxy;
 
     private FileOutputStream mVPNOutputStream;
-
-    private byte[] mPacket;
 
     private ConcurrentLinkedQueue<Packet> udpQueue;
     private FileInputStream in;
@@ -120,6 +126,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
     public static final int MUTE_SIZE = 2560;
     private int mReceivedBytes;
     private int mSentBytes;
+    /**
+     * 抓到网络数据包的时间，每抓到一个包就更新一下时间
+     */
     public static long vpnStartTime;
     public static String lastVpnStartTimeFormat = null;
     private SharedPreferences sp;
@@ -188,7 +197,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             udpServer = new UDPServer(this, udpQueue);
             udpServer.start();
             NatSessionManager.clearAllSession();
-            if (PortHostService.getInstance() != null) {
+            if (PortHostService.getInstance() == null) {
                 PortHostService.startParse(getApplicationContext());
             }
             DebugLog.i("DnsProxy started.\n");
@@ -250,6 +259,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
         in = new FileInputStream(parcelFileDescriptor.getFileDescriptor());
         while (size != -1 && IsRunning) {
             boolean hasWrite = false;
+            // 每次调用 FileInputStream.read 函数会读取一个IP数据包
             size = in.read(mPacket);
             if (size > 0) {
                 if (mTcpProxyServer.Stopped) {
@@ -257,6 +267,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
                     in.close();
                     throw new Exception("LocalServer stopped.");
                 }
+                //
                 hasWrite = onIPPacketReceived(mIPHeader, size);
             }
             if (!hasWrite) {
@@ -264,6 +275,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
                 if (packet != null) {
                     ByteBuffer bufferFromNetwork = packet.backingBuffer;
                     bufferFromNetwork.flip();
+                    // 调用 FileOutputStream.write 函数会写入一个 IP数据包 到TCP/IP协议栈。
                     mVPNOutputStream.write(bufferFromNetwork.array());
                 }
             }
@@ -322,6 +334,13 @@ public class FirewallVpnService extends VpnService implements Runnable {
         IsRunning = isRunning;
     }
 
+    /**
+     * 根据报文中的源端口获取相应的 app 信息，并将其转发给 UDPServer 或 TcpProxyServer
+     * @param ipHeader ip 报文
+     * @param size ip报文的字节长度
+     * @return
+     * @throws IOException
+     */
     boolean onIPPacketReceived(IPHeader ipHeader, int size) throws IOException {
         boolean hasWrite = false;
         switch (ipHeader.getProtocol()) {
@@ -343,8 +362,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
 
         NatSession session = NatSessionManager.getSession(portKey);
-        if (session == null || session.remoteIP != ipHeader.getDestinationIP() || session.remotePort
-                != tcpHeader.getDestinationPort()) {
+        if (session == null || session.remoteIP != ipHeader.getDestinationIP()
+                || session.remotePort != tcpHeader.getDestinationPort()) {
+            // 当没有记录过这条网络会话信息，或某个源端口的目的对象发生改变后，更新会话信息，并保存
             session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
                     .getDestinationPort(), NatSession.UDP);
             session.vpnStartTime = vpnStartTime;

@@ -2,6 +2,7 @@ package personal.nfl.vpn.processparse;
 
 /**
  * @author fuli.niu
+ * 某个 app 访问网络的基本信息
  */
 public class NetInfo {
 

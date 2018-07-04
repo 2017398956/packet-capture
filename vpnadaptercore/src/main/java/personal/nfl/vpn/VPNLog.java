@@ -3,14 +3,18 @@ package personal.nfl.vpn;
 import android.util.Log;
 
 /**
- * Created by minhui.zhu on 2017/10/26.
- * Copyright © 2017年 minhui.zhu. All rights reserved.
+ * VPN log 工具
+ *
+ * @author nfl
  */
 
 public class VPNLog {
-  public    static boolean isMakeDebugLog = true;
 
-    //open the debug log so you can get the vpn message
+    public static boolean isMakeDebugLog = true;
+
+    /**
+     * open the debug log so you can get the vpn message
+     */
     public static void makeDebugLog(boolean isMake) {
         isMakeDebugLog = isMake;
     }

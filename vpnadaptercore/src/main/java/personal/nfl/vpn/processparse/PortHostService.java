@@ -20,9 +20,12 @@ import personal.nfl.vpn.utils.VpnServiceHelper;
  */
 
 public class PortHostService extends Service {
-    private static final String ACTION = "action";
+
     private static final String TAG = "PortHostService";
     private static PortHostService instance;
+    /**
+     * 是否正在更新网络会话信息
+     */
     private boolean isRefresh = false;
 
     @Nullable
@@ -38,6 +41,11 @@ public class PortHostService extends Service {
         instance = this;
     }
 
+    /**
+     * 不能保证返回结果不是 null
+     *
+     * @return
+     */
     public static PortHostService getInstance() {
         return instance;
     }
@@ -48,53 +56,44 @@ public class PortHostService extends Service {
         instance = null;
     }
 
-    public List<NatSession> getAndRefreshSessionInfo() {
-        List<NatSession> allSession = NatSessionManager.getAllSession();
-        refreshSessionInfo(allSession);
-        return allSession;
-    }
-
-    public void refreshSessionInfo() {
-        List<NatSession> allSession = NatSessionManager.getAllSession();
-        refreshSessionInfo(allSession);
-    }
-
-    private void refreshSessionInfo(List<NatSession> netConnections) {
+    /**
+     * 刷新网络会话信息，主要是为每个网络会话信息添加 app 信息
+     * @return
+     */
+    public List<NatSession> refreshSessionInfo() {
+        List<NatSession> netConnections = NatSessionManager.getAllSession();
         if (isRefresh || netConnections == null) {
-            return;
+            return netConnections;
         }
         boolean needRefresh = false;
         for (NatSession connection : netConnections) {
             if (connection.appInfo == null) {
+                // 如果存在一个没有 app 信息的网络会话，则需要更新网络会话信息
                 needRefresh = true;
                 break;
             }
         }
         if (!needRefresh) {
-            return;
+            return netConnections;
         }
         isRefresh = true;
         try {
             NetFileManager.getInstance().refresh();
-
             for (NatSession connection : netConnections) {
                 if (connection.appInfo == null) {
                     int searchPort = connection.localPort & 0XFFFF;
                     Integer uid = NetFileManager.getInstance().getUid(searchPort);
 
                     if (uid != null) {
-                        VPNLog.d(TAG, "can not find uid");
                         connection.appInfo = AppInfo.createFromUid(VpnServiceHelper.getContext(), uid);
                     }
                 }
             }
         } catch (Exception e) {
             VPNLog.d(TAG, "failed to refreshSessionInfo " + e.getMessage());
-
         }
-
         isRefresh = false;
-
+        return netConnections;
     }
 
 

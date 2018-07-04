@@ -62,18 +62,20 @@ public class AppInfo implements Serializable {
                     list.add(new Entry("System", "nonpkg.noname"));
                 } else {
                     for (String pkgName : pkgNames) {
-                        if (pkgName != null) {
+                        if (!TextUtils.isEmpty(pkgName)) {
                             try {
                                 PackageInfo appPackageInfo = pm.getPackageInfo(pkgName, 0);
                                 String appName = null;
                                 if (appPackageInfo != null) {
                                     appName = appPackageInfo.applicationInfo.loadLabel(pm).toString();
                                 }
-                                if (appName == null || appName.equals("")) {
+                                if (TextUtils.isEmpty(appName)) {
+                                    // 如果 app 名字为空时，用包名代替
                                     appName = pkgName;
                                 }
                                 list.add(new Entry(appName, pkgName));
                             } catch (PackageManager.NameNotFoundException e) {
+                                // 当在手机系统上找不到与包名对应的 app 时
                                 list.add(new Entry(pkgName, pkgName));
                             }
                         }
@@ -85,9 +87,11 @@ public class AppInfo implements Serializable {
             }
         }
         if (list.size() == 0) {
+            // 只有 uid <= 0 时 list.size() 才为 0 ，此时默认是系统
             list.add(new Entry("System", "root.uid=0"));
         }
         Collections.sort(list, new Comparator<Entry>() {
+            @Override
             public int compare(Entry lhs, Entry rhs) {
                 int ret = lhs.appName.compareToIgnoreCase(rhs.appName);
                 if (ret == 0) {
@@ -99,8 +103,8 @@ public class AppInfo implements Serializable {
         String[] pkgs = new String[list.size()];
         String[] apps = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
-            pkgs[i] = ((Entry) list.get(i)).pkgName;
-            apps[i] = ((Entry) list.get(i)).appName;
+            pkgs[i] = list.get(i).pkgName;
+            apps[i] = list.get(i).appName;
         }
         return new AppInfo(apps[0], TextUtils.join(",", apps), pkgs);
     }

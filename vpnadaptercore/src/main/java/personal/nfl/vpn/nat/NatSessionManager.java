@@ -24,6 +24,9 @@ public class NatSessionManager {
      * 会话保存时间
      */
     private static final long SESSION_TIME_OUT_NS = 60 * 1000L;
+    /**
+     * Short 是 {@link NatSession#localPort} 源端口
+     */
     private static final ConcurrentHashMap<Short, NatSession> sessions = new ConcurrentHashMap<>();
 
     /**
@@ -94,16 +97,13 @@ public class NatSessionManager {
         session.remoteIP = remoteIP;
         session.remotePort = remotePort;
         session.localPort = portKey;
-
-
+        // 如果没有目的 ip ，则将数字形式的 ip 转化为 192.168.0.1 的形式
         if (session.remoteHost == null) {
             session.remoteHost = CommonMethods.ipIntToString(remoteIP);
         }
         session.type = type;
         session.refreshIpAndPort();
         sessions.put(portKey, session);
-
-
         return session;
     }
 

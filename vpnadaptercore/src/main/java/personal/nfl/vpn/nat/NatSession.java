@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 /**
  *
- * @author zengzheying
- * @date 15/12/29
+ * @author nfl
+ * 网络会话信息
  */
 public class NatSession implements Serializable {
     public static final String TCP = "TCP";
@@ -21,6 +21,9 @@ public class NatSession implements Serializable {
     public String remoteHost;
     public short localPort;
     public int bytesSent;
+    /**
+     * 记录当前网络会话中已经发送了多少个网络包
+     */
     public int packetSent;
     public long receiveByteNum;
     public long receivePacketNum;

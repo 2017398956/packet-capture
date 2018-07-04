@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * VPN 服务帮助类
+ * @author nfl
  */
 public class VpnServiceHelper {
 
@@ -102,7 +103,7 @@ public class VpnServiceHelper {
 
             PortHostService portHostService = PortHostService.getInstance();
             if (portHostService != null) {
-                List<NatSession> aliveConnInfo = portHostService.getAndRefreshSessionInfo();
+                List<NatSession> aliveConnInfo = portHostService.refreshSessionInfo();
                 if (aliveConnInfo != null) {
                     baseNetSessions.addAll(aliveConnInfo);
                 }
