@@ -1,11 +1,5 @@
 package personal.nfl.vpn.processparse;
 
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
-
 import java.util.List;
 
 import personal.nfl.vpn.VPNLog;
@@ -14,31 +8,21 @@ import personal.nfl.vpn.nat.NatSessionManager;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 
 /**
- * @author minhui.zhu
- * Created by minhui.zhu on 2018/5/5.
- * Copyright © 2017年 Oceanwing. All rights reserved.
+ * @author nfl
+ * 根据端口刷新 app 信息
  */
 
-public class PortHostService extends Service {
+public class AppInfoCreator {
 
-    private static final String TAG = "PortHostService";
-    private static PortHostService instance;
+    private static final String TAG = "AppInfoCreator";
+    private final static AppInfoCreator instance = new AppInfoCreator();
     /**
      * 是否正在更新网络会话信息
      */
     private boolean isRefresh = false;
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        NetFileManager.getInstance().init();
-        instance = this;
+    private AppInfoCreator(){
+        VPNLog.e(TAG , "PortHostService 新建成功");
     }
 
     /**
@@ -46,14 +30,8 @@ public class PortHostService extends Service {
      *
      * @return
      */
-    public static PortHostService getInstance() {
+    public static AppInfoCreator getInstance() {
         return instance;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        instance = null;
     }
 
     /**
@@ -61,6 +39,7 @@ public class PortHostService extends Service {
      * @return
      */
     public List<NatSession> refreshSessionInfo() {
+        NetFileManager.getInstance().refresh();
         List<NatSession> netConnections = NatSessionManager.getAllSession();
         if (isRefresh || netConnections == null) {
             return netConnections;
@@ -94,16 +73,5 @@ public class PortHostService extends Service {
         }
         isRefresh = false;
         return netConnections;
-    }
-
-
-    public static void startParse(Context context) {
-        Intent intent = new Intent(context, PortHostService.class);
-        context.startService(intent);
-    }
-
-    public static void stopParse(Context context) {
-        Intent intent = new Intent(context, PortHostService.class);
-        context.stopService(intent);
     }
 }

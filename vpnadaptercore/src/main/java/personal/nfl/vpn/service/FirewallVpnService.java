@@ -23,7 +23,7 @@ import personal.nfl.vpn.VPNLog;
 import personal.nfl.vpn.http.HttpRequestHeaderParser;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.nat.NatSessionManager;
-import personal.nfl.vpn.processparse.PortHostService;
+import personal.nfl.vpn.processparse.AppInfoCreator;
 import personal.nfl.vpn.proxy.TcpProxyServer;
 import personal.nfl.vpn.tcpip.IPHeader;
 import personal.nfl.vpn.tcpip.TCPHeader;
@@ -197,9 +197,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             udpServer = new UDPServer(this, udpQueue);
             udpServer.start();
             NatSessionManager.clearAllSession();
-            if (PortHostService.getInstance() == null) {
-                PortHostService.startParse(getApplicationContext());
-            }
+            AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
 
             ProxyConfig.Instance.onVpnStart(this);
@@ -314,10 +312,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             ThreadProxy.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
-                    if (PortHostService.getInstance() != null) {
-                        PortHostService.getInstance().refreshSessionInfo();
-                    }
-                    PortHostService.stopParse(getApplicationContext());
+                    AppInfoCreator.getInstance().refreshSessionInfo();
                 }
             });
             stopSelf();
@@ -336,8 +331,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
     /**
      * 根据报文中的源端口获取相应的 app 信息，并将其转发给 UDPServer 或 TcpProxyServer
+     *
      * @param ipHeader ip 报文
-     * @param size ip报文的字节长度
+     * @param size     ip报文的字节长度
      * @return
      * @throws IOException
      */
@@ -371,8 +367,8 @@ public class FirewallVpnService extends VpnService implements Runnable {
             ThreadProxy.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
-                    if (PortHostService.getInstance() != null) {
-                        PortHostService.getInstance().refreshSessionInfo();
+                    if (AppInfoCreator.getInstance() != null) {
+                        AppInfoCreator.getInstance().refreshSessionInfo();
                     }
 
                 }
@@ -424,7 +420,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
                 ThreadProxy.getInstance().execute(new Runnable() {
                     @Override
                     public void run() {
-                        PortHostService instance = PortHostService.getInstance();
+                        AppInfoCreator instance = AppInfoCreator.getInstance();
                         if (instance != null) {
                             instance.refreshSessionInfo();
                         }

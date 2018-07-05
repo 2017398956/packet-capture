@@ -11,7 +11,7 @@ import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.VPNLog;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.nat.NatSessionManager;
-import personal.nfl.vpn.processparse.PortHostService;
+import personal.nfl.vpn.processparse.AppInfoCreator;
 import personal.nfl.vpn.utils.ACache;
 import personal.nfl.vpn.utils.SocketUtils;
 import personal.nfl.vpn.utils.TcpDataSaveHelper;
@@ -196,8 +196,8 @@ public class UDPTunnel implements KeyHandler {
             if (channel != null) {
                 channel.close();
             }
-            if (session.appInfo == null && PortHostService.getInstance() != null) {
-                PortHostService.getInstance().refreshSessionInfo();
+            if (session.appInfo == null && AppInfoCreator.getInstance() != null) {
+                AppInfoCreator.getInstance().refreshSessionInfo();
             }
             //需要延迟一秒在保存 等到app信息完全刷新
             handler.postDelayed(new Runnable() {

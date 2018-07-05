@@ -58,10 +58,11 @@ public class NetFileManager {
     }
 
     public static NetFileManager getInstance() {
+        InnerClass.instance.init();
         return InnerClass.instance;
     }
 
-    public void init() {
+    private void init() {
         final String PATH_TCP = "/proc/net/tcp";
         final String PATH_TCP6 = "/proc/net/tcp6";
         final String PATH_UDP = "/proc/net/udp";

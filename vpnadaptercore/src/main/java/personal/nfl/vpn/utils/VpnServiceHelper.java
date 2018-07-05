@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
-import personal.nfl.vpn.processparse.PortHostService;
+import personal.nfl.vpn.processparse.AppInfoCreator;
 import personal.nfl.vpn.service.FirewallVpnService;
 
 import java.io.File;
@@ -101,7 +101,7 @@ public class VpnServiceHelper {
                 }
             }
 
-            PortHostService portHostService = PortHostService.getInstance();
+            AppInfoCreator portHostService = AppInfoCreator.getInstance();
             if (portHostService != null) {
                 List<NatSession> aliveConnInfo = portHostService.refreshSessionInfo();
                 if (aliveConnInfo != null) {

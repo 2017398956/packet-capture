@@ -17,7 +17,6 @@
                 <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
-        <service android:name="personal.nfl.vpn.processparse.PortHostService" android:exported="false"/>
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

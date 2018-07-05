@@ -6,7 +6,7 @@ import android.os.Looper;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.nat.NatSessionManager;
-import personal.nfl.vpn.processparse.PortHostService;
+import personal.nfl.vpn.processparse.AppInfoCreator;
 import personal.nfl.vpn.utils.ACache;
 import personal.nfl.vpn.utils.TcpDataSaveHelper;
 import personal.nfl.vpn.utils.ThreadProxy;
@@ -78,11 +78,11 @@ public class RemoteTcpTunnel extends RawTcpTunnel {
         if (session.appInfo != null) {
             return;
         }
-        if (PortHostService.getInstance() != null) {
+        if (AppInfoCreator.getInstance() != null) {
             ThreadProxy.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
-                    PortHostService.getInstance().refreshSessionInfo();
+                    AppInfoCreator.getInstance().refreshSessionInfo();
                 }
             });
         }

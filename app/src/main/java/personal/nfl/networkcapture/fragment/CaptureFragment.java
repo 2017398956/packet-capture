@@ -15,11 +15,14 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import personal.nfl.networkcapture.R;
 import personal.nfl.networkcapture.activity.PacketDetailActivity;
 import personal.nfl.networkcapture.adapter.ConnectionAdapter;
@@ -27,7 +30,6 @@ import personal.nfl.networkcapture.common.widget.BaseFragment;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
-import personal.nfl.vpn.processparse.AppInfo;
 import personal.nfl.vpn.utils.ThreadProxy;
 import personal.nfl.vpn.utils.TimeFormatUtil;
 import personal.nfl.vpn.utils.VpnServiceHelper;
@@ -44,7 +46,10 @@ import static personal.nfl.vpn.VPNConstants.DEFAULT_PACKAGE_ID;
 public class CaptureFragment extends BaseFragment {
 
     private static final String TAG = "CaptureFragment";
-    private ScheduledExecutorService timer;// 用于定时展示所抓的包
+    /**
+     * 取消刷新抓包列表工具
+     */
+    private Disposable disposeCapture;
     private Handler handler = new Handler();
     private ConnectionAdapter connectionAdapter;
     private ListView channelList;
@@ -96,12 +101,13 @@ public class CaptureFragment extends BaseFragment {
     }
 
     private void getDataAndRefreshView() {
+        // TODO 这里应该单线程线程池修改数据，并在如果是多线程修改容易造成数据
         ThreadProxy.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 allNetConnection.clear();
                 // TODO 这里会获取大量 socket 信息，超过一定量要精简,而且前面的内容已经加载了一遍，这里还会重复加载
-                allNetConnection.addAll(VpnServiceHelper.getAllSession()) ;
+                allNetConnection.addAll(VpnServiceHelper.getAllSession());
                 //
                 if (allNetConnection != null) {
                     iterator = allNetConnection.iterator();
@@ -110,7 +116,7 @@ public class CaptureFragment extends BaseFragment {
                     selectPackage = sp.getString(DEFAULT_PACKAGE_ID, null);
                     while (iterator.hasNext()) {
                         next = iterator.next();
-                        appPackageName = next.appInfo == null ? null : next.appInfo.pkgs.getAt(0) ;
+                        appPackageName = next.appInfo == null ? null : next.appInfo.pkgs.getAt(0);
                         if ((next.bytesSent == 0 && next.receiveByteNum == 0)
                                 || (!isShowUDP && NatSession.UDP.equals(next.type))// 是否显示 UDP 信息
                                 || (selfPackageName.equals(appPackageName)) // 移除自己的网络请求
@@ -132,20 +138,36 @@ public class CaptureFragment extends BaseFragment {
         });
     }
 
+    /**
+     * 每隔 1s 读取一次抓包信息
+     */
     private void startTimer() {
-        timer = Executors.newSingleThreadScheduledExecutor();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                getDataAndRefreshView();
-            }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+        disposeCapture = Observable
+                .create(new ObservableOnSubscribe<Integer>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
+                        int i = 0;
+                        while (true) {
+                            i++;
+                            emitter.onNext(i);
+                            Thread.sleep(1000);
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        getDataAndRefreshView();
+                    }
+                }).subscribe();
     }
 
     private void cancelTimer() {
-        if (timer != null) {
-            timer.shutdownNow();
-            timer = null;
+        if (disposeCapture != null) {
+            disposeCapture.dispose();
+            disposeCapture = null;
         }
     }
 
