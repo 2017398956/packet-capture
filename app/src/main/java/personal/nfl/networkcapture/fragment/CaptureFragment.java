@@ -15,7 +15,11 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -53,7 +57,7 @@ public class CaptureFragment extends BaseFragment {
     private Handler handler = new Handler();
     private ConnectionAdapter connectionAdapter;
     private ListView channelList;
-    private List<NatSession> allNetConnection = new ArrayList<>();
+    private volatile List<NatSession> allNetConnection = new ArrayList<>();
     private Context context;
     private String selfPackageName;
     private SharedPreferences sp;
@@ -101,47 +105,43 @@ public class CaptureFragment extends BaseFragment {
     }
 
     private void getDataAndRefreshView() {
-        // TODO 这里应该单线程线程池修改数据，并在如果是多线程修改容易造成数据
-        ThreadProxy.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                allNetConnection.clear();
-                // TODO 这里会获取大量 socket 信息，超过一定量要精简,而且前面的内容已经加载了一遍，这里还会重复加载
-                allNetConnection.addAll(VpnServiceHelper.getAllSession());
-                //
-                if (allNetConnection != null) {
-                    iterator = allNetConnection.iterator();
-                    // TODO 为了提高性能，这里应该在配置改变的时候利用通知，或共享变量来处理，而不是每次都从 sp 中获取
-                    isShowUDP = sp.getBoolean(VPNConstants.IS_UDP_SHOW, false);
-                    selectPackage = sp.getString(DEFAULT_PACKAGE_ID, null);
-                    while (iterator.hasNext()) {
-                        next = iterator.next();
-                        appPackageName = next.appInfo == null ? null : next.appInfo.pkgs.getAt(0);
-                        if ((next.bytesSent == 0 && next.receiveByteNum == 0)
-                                || (!isShowUDP && NatSession.UDP.equals(next.type))// 是否显示 UDP 信息
-                                || (selfPackageName.equals(appPackageName)) // 移除自己的网络请求
-                                || ((!TextUtils.isEmpty(selectPackage) && !selectPackage.equals(appPackageName)))
-                            // 如果选择了抓取特定 app 包，那么去掉其它的包
-                                ) {
-                            iterator.remove();
-                            continue;
-                        }
-                    }
+
+        allNetConnection.clear();
+        // TODO 这里会获取大量 socket 信息，超过一定量要精简,而且前面的内容已经加载了一遍，这里还会重复加载
+        allNetConnection.addAll(VpnServiceHelper.getAllSession());
+        //
+        if (allNetConnection != null) {
+            iterator = allNetConnection.iterator();
+            // TODO 为了提高性能，这里应该在配置改变的时候利用通知，或共享变量来处理，而不是每次都从 sp 中获取
+            isShowUDP = sp.getBoolean(VPNConstants.IS_UDP_SHOW, false);
+            selectPackage = sp.getString(DEFAULT_PACKAGE_ID, null);
+            while (iterator.hasNext()) {
+                next = iterator.next();
+                appPackageName = next.appInfo == null ? null : next.appInfo.pkgs.getAt(0);
+                if ((next.bytesSent == 0 && next.receiveByteNum == 0)
+                        || (!isShowUDP && NatSession.UDP.equals(next.type))// 是否显示 UDP 信息
+                        || (selfPackageName.equals(appPackageName)) // 移除自己的网络请求
+                        || ((!TextUtils.isEmpty(selectPackage) && !selectPackage.equals(appPackageName)))
+                    // 如果选择了抓取特定 app 包，那么去掉其它的包
+                        ) {
+                    iterator.remove();
+                    continue;
                 }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectionAdapter.notifyDataSetChanged();
-                    }
-                });
             }
-        });
+        }
+        connectionAdapter.notifyDataSetChanged();
     }
 
     /**
      * 每隔 1s 读取一次抓包信息
      */
     private void startTimer() {
+        Flowable.interval(1000 , TimeUnit.MILLISECONDS).doOnNext(new Consumer<Long>() {
+            @Override
+            public void accept(Long aLong) throws Exception {
+                getDataAndRefreshView();
+            }
+        }).observeOn(AndroidSchedulers.mainThread()) ;
         disposeCapture = Observable
                 .create(new ObservableOnSubscribe<Integer>() {
                     @Override
@@ -150,7 +150,12 @@ public class CaptureFragment extends BaseFragment {
                         while (true) {
                             i++;
                             emitter.onNext(i);
-                            Thread.sleep(1000);
+                            try{
+                                Thread.sleep(1000);
+                            }catch (InterruptedException e){
+
+                            }
+
                         }
                     }
                 })
@@ -159,7 +164,7 @@ public class CaptureFragment extends BaseFragment {
                 .doOnNext(new Consumer<Integer>() {
                     @Override
                     public void accept(Integer integer) throws Exception {
-                        getDataAndRefreshView();
+
                     }
                 }).subscribe();
     }

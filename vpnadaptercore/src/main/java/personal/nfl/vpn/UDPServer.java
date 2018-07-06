@@ -2,11 +2,6 @@ package personal.nfl.vpn;
 
 import android.net.VpnService;
 
-import personal.nfl.vpn.tunnel.UDPTunnel;
-import personal.nfl.vpn.utils.AppDebug;
-import personal.nfl.vpn.utils.DebugLog;
-import personal.nfl.vpn.utils.MyLRUCache;
-
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -14,19 +9,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import personal.nfl.vpn.tunnel.UDPTunnel;
+import personal.nfl.vpn.utils.AppDebug;
+import personal.nfl.vpn.utils.DebugLog;
+import personal.nfl.vpn.utils.MyLRUCache;
+
 /**
- * Created by minhui.zhu on 2017/7/13.
- * Copyright © 2017年 minhui.zhu. All rights reserved.
+ * @author nfl
  */
 
 public class UDPServer implements Runnable {
+
     private String TAG = UDPServer.class.getSimpleName();
     private VpnService vpnService;
     private ConcurrentLinkedQueue<Packet> outputQueue;
     private Selector selector;
-
     private boolean isClose = false;
-
     private static final int MAX_UDP_CACHE_SIZE = 50;
     private final MyLRUCache<Short, UDPTunnel> udpConnections =
             new MyLRUCache<>(MAX_UDP_CACHE_SIZE, new MyLRUCache.CleanupCallback<UDPTunnel>() {
@@ -34,7 +32,6 @@ public class UDPServer implements Runnable {
                 public void cleanUp(UDPTunnel udpTunnel) {
                     udpTunnel.close();
                 }
-
             });
 
 
@@ -52,14 +49,13 @@ public class UDPServer implements Runnable {
         this.vpnService = vpnService;
         this.outputQueue = outputQueue;
         this.selector = selector;
-
     }
 
 
-    public void processUDPPacket(Packet packet,short portKey) {
+    public void processUDPPacket(Packet packet, short portKey) {
         UDPTunnel udpConn = getUDPConn(portKey);
         if (udpConn == null) {
-            udpConn = new UDPTunnel(vpnService, selector, this, packet, outputQueue,portKey);
+            udpConn = new UDPTunnel(vpnService, selector, this, packet, outputQueue, portKey);
             putUDPConn(portKey, udpConn);
             udpConn.initConnection();
         } else {
@@ -121,20 +117,16 @@ public class UDPServer implements Runnable {
                             if (AppDebug.IS_DEBUG) {
                                 ex.printStackTrace(System.err);
                             }
-
                             DebugLog.e("TcpProxyServer iterate SelectionKey catch an exception: %s", ex);
                         }
                     }
                     keyIterator.remove();
                 }
-
-
             }
         } catch (Exception e) {
             if (AppDebug.IS_DEBUG) {
                 e.printStackTrace(System.err);
             }
-
             DebugLog.e("TcpProxyServer catch an exception: %s", e);
         } finally {
             this.stop();
@@ -147,7 +139,6 @@ public class UDPServer implements Runnable {
             selector.close();
             selector = null;
         } catch (Exception e) {
-
         }
     }
 

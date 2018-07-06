@@ -364,15 +364,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
                     .getDestinationPort(), NatSession.UDP);
             session.vpnStartTime = vpnStartTime;
-            ThreadProxy.getInstance().execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (AppInfoCreator.getInstance() != null) {
-                        AppInfoCreator.getInstance().refreshSessionInfo();
-                    }
-
-                }
-            });
+            AppInfoCreator.getInstance().refreshSessionInfo();
         }
 
         session.lastRefreshTime = System.currentTimeMillis();
@@ -417,15 +409,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
                 session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
                         .getDestinationPort(), NatSession.TCP);
                 session.vpnStartTime = vpnStartTime;
-                ThreadProxy.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        AppInfoCreator instance = AppInfoCreator.getInstance();
-                        if (instance != null) {
-                            instance.refreshSessionInfo();
-                        }
-                    }
-                });
+                AppInfoCreator.getInstance().refreshSessionInfo() ;
             }
             session.lastRefreshTime = System.currentTimeMillis();
             session.packetSent++; // 注意顺序

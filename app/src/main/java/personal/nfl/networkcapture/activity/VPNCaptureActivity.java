@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,6 @@ import personal.nfl.networkcapture.fragment.SettingFragment;
 import personal.nfl.networkcapture.retrofitserver.GitHubService;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
-import personal.nfl.vpn.processparse.NetFileManager;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -83,6 +81,12 @@ public class VPNCaptureActivity extends BaseActivity {
         initViewPager();
         initTab();
         // testRetrofit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        iv_menu_01.setImageResource(VpnServiceHelper.vpnRunningStatus() ? R.mipmap.ic_stop : R.mipmap.ic_start);
     }
 
     private void testRetrofit() {

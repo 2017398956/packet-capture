@@ -3,7 +3,6 @@ package personal.nfl.networkcapture.adapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -60,9 +59,7 @@ public class ConnectionAdapter extends BaseAdapter {
         } else {
             holder = (Holder) convertView.getTag();
         }
-        // TODO 当获取 app 信息时这里会发生数组越界
         NatSession natSession = netConnections.get(position);
-        Log.e("NFL" , natSession.appInfo == null ? "appInfo 是空" : ("appInfo:" + natSession.appInfo.toString())) ;
         holder.tv_app_name.setText(natSession.getAppInfo() != null ? natSession.getAppInfo().leaderAppName : context.getString(R.string.unknow));
         holder.iv_app_icon.setImageDrawable(natSession.getAppInfo() != null && natSession.getAppInfo().pkgs != null ?
                 AppInfo.getIcon(context, natSession.getAppInfo().pkgs.getAt(0)) : defaultDrawable);
