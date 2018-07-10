@@ -356,7 +356,16 @@ public class VPNCaptureActivity extends BaseActivity {
         };
 
         @Override
-        public void onVpnStart(Context context) {
+        public void onVpnAvailable(Context context) {
+
+        }
+
+        @Override
+        public void onVpnPreParing(Context context) {
+        }
+
+        @Override
+        public void onVpnRunning(Context context) {
             Observable
                     .just(1)
                     //.subscribeOn(Schedulers.newThread())
@@ -365,7 +374,12 @@ public class VPNCaptureActivity extends BaseActivity {
         }
 
         @Override
-        public void onVpnEnd(Context context) {
+        public void onVpnStopping(Context context) {
+
+        }
+
+        @Override
+        public void onVpnStop(Context context) {
             Observable
                     .just(2)
                     .observeOn(AndroidSchedulers.mainThread())

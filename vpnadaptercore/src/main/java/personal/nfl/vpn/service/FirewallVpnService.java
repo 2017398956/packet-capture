@@ -108,6 +108,18 @@ public class FirewallVpnService extends VpnService implements Runnable {
      * VPNService 是否再运行
      */
     private boolean IsRunning = false;
+
+    /**
+     * VPN 的运行状态
+     */
+    public enum Status {
+        STATUS_AVAILABLE , STATUS_PREPARING, STATUS_RUNNING, STATUS_STOPPING , STATUS_STOP
+    }
+
+    /**
+     * VPN 默认状态是 stop
+     */
+    private Status status = Status.STATUS_AVAILABLE;
     private Thread mVPNThread;
     // private DnsProxy mDnsProxy;
 
@@ -180,12 +192,13 @@ public class FirewallVpnService extends VpnService implements Runnable {
         sp = getSharedPreferences(VPNConstants.VPN_SP_NAME, Context.MODE_PRIVATE);
         VpnServiceHelper.onVpnServiceCreated(this);
         mVPNThread = new Thread(this, "VPNServiceThread");
-        mVPNThread.start();
-        setVpnRunningStatus(true);
+        startVPN();
     }
 
     @Override
     public void run() {
+        status = Status.STATUS_PREPARING;
+        ProxyConfig.Instance.onVpnPreparing(this);
         try {
             DebugLog.i("VPNService(%s) work thread is Running...\n", ID);
             waitUntilPrepared();
@@ -199,9 +212,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
             NatSessionManager.clearAllSession();
             AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
-
-            ProxyConfig.Instance.onVpnStart(this);
-            while (IsRunning) {
+            status = Status.STATUS_RUNNING ;
+            ProxyConfig.Instance.onVpnRunning(this);
+            while (status == Status.STATUS_RUNNING) {
                 startStream(establishVPN());
             }
         } catch (InterruptedException e) {
@@ -216,7 +229,8 @@ public class FirewallVpnService extends VpnService implements Runnable {
             DebugLog.e("VpnService run catch an exception %s.\n", e);
         } finally {
             DebugLog.i("VpnService terminated");
-            ProxyConfig.Instance.onVpnEnd(this);
+            status = Status.STATUS_STOPPING ;
+            ProxyConfig.Instance.onVpnStopping(this);
             dispose();
         }
     }
@@ -227,10 +241,6 @@ public class FirewallVpnService extends VpnService implements Runnable {
     @Override
     public void onDestroy() {
         DebugLog.i("VPNService(%s) destroyed.\n", ID);
-        if (mVPNThread != null) {
-            mVPNThread.interrupt();
-        }
-        VpnServiceHelper.onVpnServiceDestroy();
         super.onDestroy();
     }
 
@@ -298,27 +308,47 @@ public class FirewallVpnService extends VpnService implements Runnable {
         }
     }
 
-    private synchronized void dispose() {
-        try {
-            // 停止TCP代理服务
-            if (mTcpProxyServer != null) {
-                mTcpProxyServer.stop();
-                mTcpProxyServer = null;
-                DebugLog.i("TcpProxyServer stopped.\n");
-            }
-            if (udpServer != null) {
-                udpServer.closeAllUDPConn();
-            }
-            ThreadProxy.getInstance().execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppInfoCreator.getInstance().refreshSessionInfo();
-                }
-            });
-            stopSelf();
-            setVpnRunningStatus(false);
-        } catch (Exception e) {
+    /**
+     * 开启 VPN
+     */
+    public void startVPN() {
+        if (status != Status.STATUS_AVAILABLE) {
+            mVPNThread.interrupt();
+            status = Status.STATUS_AVAILABLE;
         }
+        mVPNThread.start();
+    }
+
+    /**
+     * 关闭 VPN 服务
+     */
+    public void stopVPN() {
+        dispose();
+    }
+
+    private synchronized void dispose() {
+        // 停止 TCP 代理服务
+        if (mTcpProxyServer != null) {
+            mTcpProxyServer.stop();
+            mTcpProxyServer = null;
+        }
+        // 停止 UDP 代理服务
+        if (udpServer != null) {
+            udpServer.closeAllUDPConn();
+        }
+        ThreadProxy.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppInfoCreator.getInstance().refreshSessionInfo();
+            }
+        });
+        if (mVPNThread != null) {
+            mVPNThread.interrupt();
+        }
+        stopSelf();
+        status = Status.STATUS_STOP ;
+        ProxyConfig.Instance.onVpnStop(this);
+        VpnServiceHelper.onVpnServiceDestroy();
     }
 
     public boolean vpnRunningStatus() {
@@ -409,7 +439,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
                 session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
                         .getDestinationPort(), NatSession.TCP);
                 session.vpnStartTime = vpnStartTime;
-                AppInfoCreator.getInstance().refreshSessionInfo() ;
+                AppInfoCreator.getInstance().refreshSessionInfo();
             }
             session.lastRefreshTime = System.currentTimeMillis();
             session.packetSent++; // 注意顺序
@@ -441,5 +471,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
         }
         hasWrite = true;
         return hasWrite;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }

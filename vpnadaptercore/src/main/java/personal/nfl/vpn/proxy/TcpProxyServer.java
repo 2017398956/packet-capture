@@ -79,6 +79,7 @@ public class TcpProxyServer implements Runnable {
                 DebugLog.e("TcpProxyServer mServerSocketChannel.close() catch an exception: %s", ex);
             }
         }
+        DebugLog.i("TcpProxyServer stopped.\n");
     }
 
 

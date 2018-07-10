@@ -72,6 +72,7 @@ public class UDPServer implements Runnable {
                 it.remove();
             }
         }
+        DebugLog.i("UDPServer stopped.\n");
     }
 
 

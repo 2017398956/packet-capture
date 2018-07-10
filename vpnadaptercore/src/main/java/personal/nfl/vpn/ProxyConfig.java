@@ -6,6 +6,8 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
+import personal.nfl.vpn.service.FirewallVpnService;
+
 /**
  * 代理配置
  */
@@ -43,21 +45,41 @@ public class ProxyConfig {
         mVpnStatusListeners.remove(vpnStatusListener);
     }
 
-    public void onVpnStart(Context context) {
-        if (mVpnStatusListeners.size() > 0) {
-            for (VpnStatusListener listener : mVpnStatusListeners) {
-                if (null != listener) {
-                    listener.onVpnStart(context);
-                }
-            }
-        }
+    public void onVpnAvailable(Context context) {
+        onVpnStatusChange(context, FirewallVpnService.Status.STATUS_AVAILABLE);
     }
 
-    public void onVpnEnd(Context context) {
+    public void onVpnPreparing(Context context) {
+        onVpnStatusChange(context, FirewallVpnService.Status.STATUS_PREPARING);
+    }
+
+    public void onVpnRunning(Context context) {
+        onVpnStatusChange(context, FirewallVpnService.Status.STATUS_RUNNING);
+    }
+
+    public void onVpnStopping(Context context) {
+        onVpnStatusChange(context, FirewallVpnService.Status.STATUS_STOPPING);
+    }
+
+    public void onVpnStop(Context context) {
+        onVpnStatusChange(context, FirewallVpnService.Status.STATUS_STOP);
+    }
+
+    private void onVpnStatusChange(Context context, FirewallVpnService.Status status) {
         if (mVpnStatusListeners.size() > 0) {
             for (VpnStatusListener listener : mVpnStatusListeners) {
                 if (null != listener) {
-                    listener.onVpnEnd(context);
+                    if (status == FirewallVpnService.Status.STATUS_AVAILABLE) {
+                        listener.onVpnPreParing(context);
+                    } else if (status == FirewallVpnService.Status.STATUS_PREPARING) {
+                        listener.onVpnPreParing(context);
+                    } else if (status == FirewallVpnService.Status.STATUS_RUNNING) {
+                        listener.onVpnRunning(context);
+                    } else if (status == FirewallVpnService.Status.STATUS_STOPPING) {
+                        listener.onVpnStopping(context);
+                    } else if (status == FirewallVpnService.Status.STATUS_STOP) {
+                        listener.onVpnStop(context);
+                    }
                 }
             }
         }
@@ -104,8 +126,15 @@ public class ProxyConfig {
     }
 
     public interface VpnStatusListener {
-        void onVpnStart(Context context);
 
-        void onVpnEnd(Context context);
+        void onVpnAvailable(Context context);
+
+        void onVpnPreParing(Context context);
+
+        void onVpnRunning(Context context);
+
+        void onVpnStopping(Context context);
+
+        void onVpnStop(Context context);
     }
 }

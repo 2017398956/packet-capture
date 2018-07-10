@@ -179,12 +179,27 @@ public class CaptureFragment extends BaseFragment {
     private ProxyConfig.VpnStatusListener listener = new ProxyConfig.VpnStatusListener() {
 
         @Override
-        public void onVpnStart(Context context) {
+        public void onVpnAvailable(Context context) {
+
+        }
+
+        @Override
+        public void onVpnPreParing(Context context) {
+
+        }
+
+        @Override
+        public void onVpnRunning(Context context) {
             startTimer();
         }
 
         @Override
-        public void onVpnEnd(Context context) {
+        public void onVpnStopping(Context context) {
+
+        }
+
+        @Override
+        public void onVpnStop(Context context) {
             cancelTimer();
         }
     };
