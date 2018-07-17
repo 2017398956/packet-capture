@@ -136,4 +136,12 @@ public class VpnServiceHelper {
     public static Context getContext() {
         return context;
     }
+
+    public static FirewallVpnService.Status getVpnServiceStatus(){
+        if(null != sVpnService){
+            return sVpnService.getStatus() ;
+        }else {
+            return FirewallVpnService.Status.STATUS_AVAILABLE ;
+        }
+    }
 }

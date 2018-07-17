@@ -38,6 +38,7 @@ import personal.nfl.vpn.utils.VpnServiceHelper;
 
 /**
  * 自定义 VPN 服务
+ * @author nfl
  */
 public class FirewallVpnService extends VpnService implements Runnable {
 

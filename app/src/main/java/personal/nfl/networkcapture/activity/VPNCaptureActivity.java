@@ -36,6 +36,7 @@ import personal.nfl.networkcapture.fragment.SettingFragment;
 import personal.nfl.networkcapture.retrofitserver.GitHubService;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
+import personal.nfl.vpn.service.FirewallVpnService;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -325,11 +326,14 @@ public class VPNCaptureActivity extends BaseActivity {
                 case R.id.tv_title:
                     break;
                 case R.id.iv_menu_01:
-                    if (VpnServiceHelper.vpnRunningStatus()) {
-                        closeVpn();
-                    } else {
+                    if(VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_AVAILABLE){
                         startVPN();
+                    }else if(VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_RUNNING){
+                        closeVpn();
+                    }else {
+                        Toast.makeText(context, "VPN 服务工作中请稍后再试", Toast.LENGTH_SHORT).show();
                     }
+                    Log.d("NFL" , VpnServiceHelper.getVpnServiceStatus() + "") ;
                     break;
                 case R.id.iv_back:
                     Intent intent = new Intent(VPNCaptureActivity.this, PackageListActivity.class);
