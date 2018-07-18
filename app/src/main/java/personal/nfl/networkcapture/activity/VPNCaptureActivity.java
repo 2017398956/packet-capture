@@ -326,14 +326,15 @@ public class VPNCaptureActivity extends BaseActivity {
                 case R.id.tv_title:
                     break;
                 case R.id.iv_menu_01:
-                    if(VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_AVAILABLE){
+                    pb_loading.setVisibility(View.VISIBLE);
+                    if (VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_AVAILABLE) {
                         startVPN();
-                    }else if(VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_RUNNING){
+                    } else if (VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_RUNNING) {
                         closeVpn();
-                    }else {
-                        Toast.makeText(context, "VPN 服务工作中请稍后再试", Toast.LENGTH_SHORT).show();
+                    } else {
+
                     }
-                    Log.d("NFL" , VpnServiceHelper.getVpnServiceStatus() + "") ;
+                    Log.d("NFL", VpnServiceHelper.getVpnServiceStatus() + "");
                     break;
                 case R.id.iv_back:
                     Intent intent = new Intent(VPNCaptureActivity.this, PackageListActivity.class);
@@ -355,17 +356,34 @@ public class VPNCaptureActivity extends BaseActivity {
                     case 2:
                         iv_menu_01.setImageResource(R.mipmap.ic_start);
                         break;
+                    case 3:
+                        pb_loading.setVisibility(View.VISIBLE);
+                        iv_menu_01.setVisibility(View.GONE);
+                        break;
+                    case 4:
+                        pb_loading.setVisibility(View.GONE);
+                        iv_menu_01.setVisibility(View.VISIBLE);
+                        break;
                 }
             }
         };
 
         @Override
         public void onVpnAvailable(Context context) {
-
+            Observable
+                    .just(4)
+                    //.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
         }
 
         @Override
         public void onVpnPreParing(Context context) {
+            Observable
+                    .just(3)
+                    //.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
         }
 
         @Override
@@ -375,17 +393,31 @@ public class VPNCaptureActivity extends BaseActivity {
                     //.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(consumer);
+            Observable
+                    .just(4)
+                    //.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
         }
 
         @Override
         public void onVpnStopping(Context context) {
-
+            Observable
+                    .just(3)
+                    //.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
         }
 
         @Override
         public void onVpnStop(Context context) {
             Observable
                     .just(2)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(consumer);
+            Observable
+                    .just(4)
+                    //.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(consumer);
         }

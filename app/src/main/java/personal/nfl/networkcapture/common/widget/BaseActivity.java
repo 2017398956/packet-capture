@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,6 +18,9 @@ import personal.nfl.networkcapture.R;
 import personal.nfl.networkcapture.common.listener.BaseOnClickListener;
 import personal.nfl.networkcapture.common.util.SoftKeyBoardTool;
 
+/**
+ * @author fuli.niu
+ */
 public class BaseActivity extends FragmentActivity {
 
     protected Context context;
@@ -24,6 +28,7 @@ public class BaseActivity extends FragmentActivity {
     protected ImageView iv_back;
     protected TextView tv_title;
     protected ImageView iv_menu_01;
+    protected ProgressBar pb_loading ;
     protected LinearLayout ll_pad_container;
     protected LinearLayout ll_data_binding;
     private ViewStub vs_no_data = null;
@@ -40,6 +45,7 @@ public class BaseActivity extends FragmentActivity {
      *
      * @param layoutResID
      */
+    @Override
     public void setContentView(int layoutResID) {
         super.setContentView(R.layout.activity_base);
         initActionBarAndViewStub();
@@ -51,6 +57,7 @@ public class BaseActivity extends FragmentActivity {
         }
     }
 
+    @Override
     public void setContentView(View view) {
         super.setContentView(R.layout.activity_base);
         initActionBarAndViewStub();
@@ -74,6 +81,7 @@ public class BaseActivity extends FragmentActivity {
         });
         tv_title = findViewById(R.id.tv_title);
         iv_menu_01 = findViewById(R.id.iv_menu_01) ;
+        pb_loading = findViewById(R.id.pb_loading) ;
     }
 
 

@@ -117,11 +117,11 @@ public class VpnServiceHelper {
 
     public static void startVpnService(Context context) {
         if (context == null) {
-            return;
+            throw new IllegalArgumentException("VpnServiceHelper : context cannot be null");
         }
         if (null == sVpnService) {
             context.startService(new Intent(context, FirewallVpnService.class));
-        }else {
+        } else if(sVpnService.getStatus() == FirewallVpnService.Status.STATUS_AVAILABLE){
             sVpnService.startVPN();
         }
     }
@@ -137,11 +137,11 @@ public class VpnServiceHelper {
         return context;
     }
 
-    public static FirewallVpnService.Status getVpnServiceStatus(){
-        if(null != sVpnService){
-            return sVpnService.getStatus() ;
-        }else {
-            return FirewallVpnService.Status.STATUS_AVAILABLE ;
+    public static FirewallVpnService.Status getVpnServiceStatus() {
+        if (null != sVpnService) {
+            return sVpnService.getStatus();
+        } else {
+            return FirewallVpnService.Status.STATUS_AVAILABLE;
         }
     }
 }

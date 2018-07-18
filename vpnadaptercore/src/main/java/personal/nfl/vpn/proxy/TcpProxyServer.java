@@ -117,7 +117,7 @@ public class TcpProxyServer implements Runnable {
                                 ex.printStackTrace(System.err);
                             }
 
-                            DebugLog.e("udp iterate SelectionKey catch an exception: %s", ex);
+                            DebugLog.e("tcp iterate SelectionKey catch an exception: %s", ex);
                         }
                     }
                     keyIterator.remove();
@@ -130,10 +130,10 @@ public class TcpProxyServer implements Runnable {
                 e.printStackTrace(System.err);
             }
 
-            DebugLog.e("updServer catch an exception: %s", e);
+            DebugLog.e("TcpServer catch an exception: %s", e);
         } finally {
             this.stop();
-            DebugLog.i("udpServer thread exited.");
+            DebugLog.i("TcpServer thread exited.");
         }
     }
 

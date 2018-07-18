@@ -34,4 +34,15 @@
         android:scaleType="center"
         android:visibility="invisible"
         android:src="@mipmap/ic_start" />
+
+    <ProgressBar
+        android:id="@+id/pb_loading"
+        android:layout_width="@dimen/action_bar_height"
+        android:layout_height="@dimen/action_bar_height"
+        android:layout_alignParentRight="true"
+        android:padding="15dp"
+        android:enabled="false"
+        android:visibility="invisible"
+        android:scaleType="center"
+        />
 </RelativeLayout>

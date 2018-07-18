@@ -216,7 +216,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             status = Status.STATUS_RUNNING ;
             ProxyConfig.Instance.onVpnRunning(this);
             while (status == Status.STATUS_RUNNING) {
-                startStream(establishVPN());
+                 startStream(establishVPN());
             }
         } catch (InterruptedException e) {
             if (AppDebug.IS_DEBUG) {
@@ -259,10 +259,14 @@ public class FirewallVpnService extends VpnService implements Runnable {
             builder.addAllowedApplication(selectPackage);
             builder.addAllowedApplication(getPackageName());
         }
+        // 不调用 establish() 手机不会显示 vpn 图标
         return builder.establish();
     }
 
     private void startStream(ParcelFileDescriptor parcelFileDescriptor) throws Exception {
+        if(null == parcelFileDescriptor || true){
+            return;
+        }
         int size = 0;
         mVPNOutputStream = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
         in = new FileInputStream(parcelFileDescriptor.getFileDescriptor());
@@ -294,19 +298,19 @@ public class FirewallVpnService extends VpnService implements Runnable {
     }
 
     /**
-     * 死循环知道 VPN 准备好
+     * 死循环知道 VPN 准备好，理论上已经在 activity 中启动了 vpn ，这里不应该再 prepare 暂时去掉，看看效果
      */
     private void waitUntilPrepared() {
-        while (prepare(this) != null) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                if (AppDebug.IS_DEBUG) {
-                    e.printStackTrace();
-                }
-                DebugLog.e("waitUntilPrepared catch an exception %s\n", e);
-            }
-        }
+//        while (prepare(this) != null) {
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                if (AppDebug.IS_DEBUG) {
+//                    e.printStackTrace();
+//                }
+//                DebugLog.e("waitUntilPrepared catch an exception %s\n", e);
+//            }
+//        }
     }
 
     /**
