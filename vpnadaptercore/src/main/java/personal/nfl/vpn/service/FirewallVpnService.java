@@ -210,6 +210,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             // 启动 UDP 代理服务
             udpServer = new UDPServer(this, udpQueue);
             udpServer.start();
+
             NatSessionManager.clearAllSession();
             AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
@@ -390,7 +391,6 @@ public class FirewallVpnService extends VpnService implements Runnable {
     private void onUdpPacketReceived(IPHeader ipHeader, int size) throws UnknownHostException {
         TCPHeader tcpHeader = mTCPHeader;
         short portKey = tcpHeader.getSourcePort();
-
 
         NatSession session = NatSessionManager.getSession(portKey);
         if (session == null || session.remoteIP != ipHeader.getDestinationIP()

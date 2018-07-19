@@ -1,8 +1,4 @@
 package personal.nfl.vpn;
-/**
- * Created by minhui.zhu on 2017/6/24.
- * Copyright © 2017年 minhui.zhu. All rights reserved.
- */
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,16 +12,17 @@ import java.nio.ByteBuffer;
 import java.util.Locale;
 
 /**
- * Representation of an IP Packet
+ * IP 数据包
+ * @author nfl
  */
 
 public class Packet implements Serializable {
+
+    private static final String TAG = "Packet";
     public static final int IP4_HEADER_SIZE = 20;
     public static final int TCP_HEADER_SIZE = 20;
     public static final int UDP_HEADER_SIZE = 8;
     private static final int FIRST_TCP_DATA = 40;
-    private static final String TAG = "Packet";
-
 
     public IP4Header ip4Header;
     public TCPHeader tcpHeader;
@@ -45,45 +42,8 @@ public class Packet implements Serializable {
     private boolean isHttp;
     private String urlPath;
 
+    private Packet() {
 
-    public boolean isSSL() {
-        return isSSL;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
-
-    public String getRequestUrl() {
-        return requestUrl;
-    }
-
-    public IP4Header getIp4Header() {
-        return ip4Header;
-    }
-
-    public TCPHeader getTcpHeader() {
-        return tcpHeader;
-    }
-
-    public UDPHeader getUdpHeader() {
-        return udpHeader;
-    }
-
-    public ByteBuffer getBackingBuffer() {
-        return backingBuffer;
-    }
-
-    public boolean isReleaseAfterWritingToDevice() {
-        return releaseAfterWritingToDevice;
-    }
-
-    public boolean isCancelSending() {
-        return cancelSending;
-    }
-
-    public int getPlayLoadSize() {
-        return playLoadSize;
     }
 
     public Packet(ByteBuffer buffer) throws UnknownHostException {
@@ -99,10 +59,10 @@ public class Packet implements Serializable {
         this.playLoadSize = buffer.limit() - buffer.position();
     }
 
-    private Packet() {
-
-    }
-
+    /**
+     * 复制一个新的 IP 数据包
+     * @return
+     */
     public Packet duplicated() {
         Packet packet = new Packet();
         packet.ip4Header = ip4Header.duplicate();
@@ -115,28 +75,6 @@ public class Packet implements Serializable {
         packet.isTCP = isTCP;
         packet.isUDP = isUDP;
         return packet;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Packet{");
-        sb.append("ip4Header=").append(ip4Header);
-        if (isTCP) {
-            sb.append(", tcpHeader=").append(tcpHeader);
-        } else if (isUDP) {
-            sb.append(", udpHeader=").append(udpHeader);
-        }
-        sb.append(", payloadSize=").append(backingBuffer.limit() - backingBuffer.position());
-        sb.append('}');
-        return sb.toString();
-    }
-
-    public boolean isTCP() {
-        return isTCP;
-    }
-
-    boolean isUDP() {
-        return isUDP;
     }
 
     public void swapSourceAndDestination() {
@@ -225,7 +163,9 @@ public class Packet implements Serializable {
         backingBuffer.putShort(10, (short) sum);
     }
 
-    //to control the data accuracyF
+    /**
+     * to control the data accuracyF
+     */
     private int updateTCPChecksum(int payloadSize) {
         int sum = 0;
         int tcpLength = TCP_HEADER_SIZE + payloadSize;
@@ -865,5 +805,67 @@ public class Packet implements Serializable {
         private static long getUnsignedInt(int value) {
             return value & 0xFFFFFFFFL;
         }
+    }
+
+    public boolean isSSL() {
+        return isSSL;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
+    }
+
+    public IP4Header getIp4Header() {
+        return ip4Header;
+    }
+
+    public TCPHeader getTcpHeader() {
+        return tcpHeader;
+    }
+
+    public UDPHeader getUdpHeader() {
+        return udpHeader;
+    }
+
+    public ByteBuffer getBackingBuffer() {
+        return backingBuffer;
+    }
+
+    public boolean isReleaseAfterWritingToDevice() {
+        return releaseAfterWritingToDevice;
+    }
+
+    public boolean isCancelSending() {
+        return cancelSending;
+    }
+
+    public int getPlayLoadSize() {
+        return playLoadSize;
+    }
+
+    public boolean isTCP() {
+        return isTCP;
+    }
+
+    boolean isUDP() {
+        return isUDP;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Packet{");
+        sb.append("ip4Header=").append(ip4Header);
+        if (isTCP) {
+            sb.append(", tcpHeader=").append(tcpHeader);
+        } else if (isUDP) {
+            sb.append(", udpHeader=").append(udpHeader);
+        }
+        sb.append(", payloadSize=").append(backingBuffer.limit() - backingBuffer.position());
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -26,6 +26,9 @@ public class UDPServer implements Runnable {
     private Selector selector;
     private boolean isClose = false;
     private static final int MAX_UDP_CACHE_SIZE = 50;
+    /**
+     * Short 源端口
+     */
     private final MyLRUCache<Short, UDPTunnel> udpConnections =
             new MyLRUCache<>(MAX_UDP_CACHE_SIZE, new MyLRUCache.CleanupCallback<UDPTunnel>() {
                 @Override
@@ -48,15 +51,19 @@ public class UDPServer implements Runnable {
         }
         this.vpnService = vpnService;
         this.outputQueue = outputQueue;
-        this.selector = selector;
     }
 
-
-    public void processUDPPacket(Packet packet, short portKey) {
-        UDPTunnel udpConn = getUDPConn(portKey);
+    /**
+     * 发送 UDP 数据
+     *
+     * @param packet     IP 数据包
+     * @param sourcePort 源端口
+     */
+    public void processUDPPacket(Packet packet, short sourcePort) {
+        UDPTunnel udpConn = getUDPConn(sourcePort);
         if (udpConn == null) {
-            udpConn = new UDPTunnel(vpnService, selector, this, packet, outputQueue, portKey);
-            putUDPConn(portKey, udpConn);
+            udpConn = new UDPTunnel(vpnService, selector, this, packet, outputQueue, sourcePort);
+            putUDPConn(sourcePort, udpConn);
             udpConn.initConnection();
         } else {
             udpConn.processPacket(packet);
@@ -89,11 +96,15 @@ public class UDPServer implements Runnable {
         }
     }
 
-    void putUDPConn(short ipAndPort, UDPTunnel connection) {
+    /**
+     * 添加 UDP 数据通道
+     * @param sourcePort
+     * @param connection
+     */
+    private void putUDPConn(short sourcePort, UDPTunnel connection) {
         synchronized (udpConnections) {
-            udpConnections.put(ipAndPort, connection);
+            udpConnections.put(sourcePort, connection);
         }
-
     }
 
     @Override

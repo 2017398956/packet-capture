@@ -1,20 +1,17 @@
-
-
 package personal.nfl.vpn.utils;
-/**
- * Created by minhui.zhu on 2017/6/24.
- * Copyright © 2017年 minhui.zhu. All rights reserved.
- */
 
 import java.util.LinkedHashMap;
 
+/**
+ * @author fuli.niu
+ */
 public class MyLRUCache<K, V> extends LinkedHashMap<K, V> {
+
     private int maxSize;
-    private transient CleanupCallback< V> callback;
+    private transient CleanupCallback<V> callback;
 
     public MyLRUCache(int maxSize, CleanupCallback<V> callback) {
         super(maxSize + 1, 1, true);
-
         this.maxSize = maxSize;
         this.callback = callback;
     }
@@ -33,7 +30,7 @@ public class MyLRUCache<K, V> extends LinkedHashMap<K, V> {
         /**
          * 清除对象
          *
-         * @param eldest
+         * @param v
          */
         void cleanUp(V v);
     }

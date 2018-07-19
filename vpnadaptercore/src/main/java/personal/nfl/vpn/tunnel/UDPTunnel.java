@@ -31,8 +31,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Created by minhui.zhu on 2017/7/11.
- * Copyright © 2017年 minhui.zhu. All rights reserved.
+ * Created nfl
  */
 
 public class UDPTunnel implements KeyHandler {
@@ -199,7 +198,7 @@ public class UDPTunnel implements KeyHandler {
             if (session.appInfo == null && AppInfoCreator.getInstance() != null) {
                 AppInfoCreator.getInstance().refreshSessionInfo();
             }
-            //需要延迟一秒在保存 等到app信息完全刷新
+            // 需要延迟一秒在保存 等到 app 信息完全刷新
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {

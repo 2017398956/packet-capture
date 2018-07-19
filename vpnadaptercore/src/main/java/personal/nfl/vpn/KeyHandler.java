@@ -3,11 +3,16 @@ package personal.nfl.vpn;
 import java.nio.channels.SelectionKey;
 
 /**
- * @author minhui.zhu
- *         Created by minhui.zhu on 2018/5/11.
- *         Copyright © 2017年 Oceanwing. All rights reserved.
+ * @author nfl
+ * {@link SelectionKey} 分发接口
  */
 
 public interface KeyHandler {
+
+    /**
+     * 当 {@link SelectionKey} 准备好时
+     *
+     * @param key
+     */
     void onKeyReady(SelectionKey key);
 }
