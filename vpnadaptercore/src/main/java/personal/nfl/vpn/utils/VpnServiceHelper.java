@@ -15,6 +15,7 @@ import java.util.List;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.processparse.AppInfoCreator;
+import personal.nfl.vpn.service.BaseVpnService;
 import personal.nfl.vpn.service.FirewallVpnService;
 
 /**
@@ -26,10 +27,10 @@ public class VpnServiceHelper {
 
     private static Context context;
     public static final int START_VPN_SERVICE_REQUEST_CODE = 2015;
-    private static FirewallVpnService sVpnService;
+    private static BaseVpnService sVpnService;
     private static SharedPreferences sp;
 
-    public static void onVpnServiceCreated(FirewallVpnService vpnService) {
+    public static void onVpnServiceCreated(BaseVpnService vpnService) {
         sVpnService = vpnService;
         if (context == null) {
             context = vpnService.getApplicationContext();
@@ -121,7 +122,7 @@ public class VpnServiceHelper {
         }
         if (null == sVpnService) {
             context.startService(new Intent(context, FirewallVpnService.class));
-        } else if(sVpnService.getStatus() == FirewallVpnService.Status.STATUS_AVAILABLE){
+        } else if (sVpnService.getStatus() == BaseVpnService.Status.STATUS_AVAILABLE) {
             sVpnService.startVPN();
         }
     }

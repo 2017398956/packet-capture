@@ -87,6 +87,9 @@ public class TcpProxyServer implements Runnable {
     public void run() {
         try {
             while (true) {
+                if(null == mSelector){
+                    continue;
+                }
                 int select = mSelector.select();
                 if (select == 0) {
                     Thread.sleep(5);

@@ -3,6 +3,7 @@ package personal.nfl.vpn.tunnel;
 
 import personal.nfl.vpn.KeyHandler;
 import personal.nfl.vpn.nat.NatSessionManager;
+import personal.nfl.vpn.service.BaseVpnService;
 import personal.nfl.vpn.service.FirewallVpnService;
 import personal.nfl.vpn.utils.AppDebug;
 import personal.nfl.vpn.utils.DebugLog;
@@ -139,7 +140,7 @@ public abstract class TcpTunnel implements KeyHandler {
 
     public void onReadable(SelectionKey key) {
         try {
-            ByteBuffer buffer = ByteBuffer.allocate(FirewallVpnService.MUTE_SIZE);
+            ByteBuffer buffer = ByteBuffer.allocate(BaseVpnService.MUTE_SIZE);
             buffer.clear();
             int bytesRead = mInnerChannel.read(buffer);
             if (bytesRead > 0) {

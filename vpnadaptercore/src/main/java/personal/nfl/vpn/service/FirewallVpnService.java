@@ -2,6 +2,7 @@ package personal.nfl.vpn.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import personal.nfl.vpn.Packet;
 import personal.nfl.vpn.ProxyConfig;
+import personal.nfl.vpn.R;
 import personal.nfl.vpn.UDPServer;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.VPNLog;
@@ -35,46 +37,18 @@ import personal.nfl.vpn.utils.ThreadProxy;
 import personal.nfl.vpn.utils.TimeFormatUtil;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 
+import static personal.nfl.vpn.VPNConstants.DEFAULT_PACKAGE_ID;
+
 
 /**
  * 自定义 VPN 服务
+ *
  * @author nfl
  */
-public class FirewallVpnService extends VpnService implements Runnable {
+public class FirewallVpnService extends BaseVpnService implements Runnable {
 
     private static final String TAG = "FirewallVpnService";
 
-    public static final String ACTION_START_VPN = "personal.nfl.START_VPN";
-    public static final String ACTION_CLOSE_VPN = "personal.nfl.roav.CLOSE_VPN";
-    private static final String FACEBOOK_APP = "com.facebook.katana";
-    private static final String YOUTUBE_APP = "com.google.android.youtube";
-    private static final String GOOGLE_MAP_APP = "com.google.android.apps.maps";
-    public static final String BROADCAST_VPN_STATE = "personal.nfl.localvpn.VPN_STATE";
-    public static final String SELECT_PACKAGE_ID = "select_protect_package_id";
-
-    private VpnService.Builder builder;
-    /**
-     * 设置 VPN 的 IP 地址（这里只支持 IPv4）
-     * 这个地址可以去查查，360 流量卫士里面的地址为 192.168.*.*;
-     * 好多也使用10.0.2.0；不确定，都可以试试。这里使用的是 {@linkplain #LOCAL_IP}
-     */
-    private static final String VPN_ADDRESS = "10.0.0.2";
-    /**
-     * VPN IP 地址；
-     */
-    private static int LOCAL_IP;
-    /**
-     * 只有匹配上的 IP包 ，才会被路由到虚拟端口上去。如果是 0.0.0.0/0 的话，则会将所有的IP包都路由到虚拟端口上去；
-     */
-    private static final String VPN_ROUTE = "0.0.0.0";
-    /**
-     * 下面是一些常见的 DNS 地址
-     */
-    private static final String GOOGLE_DNS_FIRST = "8.8.8.8";
-    private static final String GOOGLE_DNS_SECOND = "8.8.4.4";
-    private static final String AMERICA = "208.67.222.222";
-    private static final String HK_DNS_SECOND = "205.252.144.228";
-    private static final String CHINA_DNS_FIRST = "114.114.114.114";
     /**
      * 用于标记新创建的 Vpn 服务
      */
@@ -105,22 +79,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
      */
     private UDPServer udpServer;
     private final ByteBuffer mDNSBuffer;
-    /**
-     * VPNService 是否再运行
-     */
-    private boolean IsRunning = false;
 
-    /**
-     * VPN 的运行状态
-     */
-    public enum Status {
-        STATUS_AVAILABLE , STATUS_PREPARING, STATUS_RUNNING, STATUS_STOPPING , STATUS_STOP
-    }
-
-    /**
-     * VPN 默认状态是 stop
-     */
-    private Status status = Status.STATUS_AVAILABLE;
     private Thread mVPNThread;
     // private DnsProxy mDnsProxy;
 
@@ -133,10 +92,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
      * 选择抓取特定 app 的包，默认是 null
      */
     private String selectPackage;
-    /**
-     * 虚拟网络端口的最大传输单元，如果发送的包长度超过这个数字，则会被分包；一般设为 1500
-     */
-    public static final int MUTE_SIZE = 2560;
+
     private int mReceivedBytes;
     private int mSentBytes;
     /**
@@ -145,8 +101,13 @@ public class FirewallVpnService extends VpnService implements Runnable {
     public static long vpnStartTime;
     public static String lastVpnStartTimeFormat = null;
     private SharedPreferences sp;
+    /*
+     * 用于获取 vpn 数据时的临时变量，为了避免反复 new ，作为类变量声明
+     */
+    private ParcelFileDescriptor parcelFileDescriptorTemp;
 
     public FirewallVpnService() {
+        super();
         ID++;
         mPacket = new byte[MUTE_SIZE];
         mIPHeader = new IPHeader(mPacket, 0);
@@ -156,31 +117,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
         // Offset = ip 报文头部长度 + udp 报文头部长度 = 28
         mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
         DebugLog.i("New VPNService(%d)\n", ID);
-        builder = new Builder()
-                // 设置 VPN 最大传输单位
-                .setMtu(MUTE_SIZE)
-                // 设置 VPN 路由
-                .addRoute(VPN_ROUTE, 0)
-                // 配置 DNS
-                .addDnsServer(GOOGLE_DNS_FIRST)
-                .addDnsServer(GOOGLE_DNS_SECOND)
-                .addDnsServer(CHINA_DNS_FIRST)
-                .addDnsServer(AMERICA)
-        // 就是添加 DNS 域名的自动补齐。DNS服务器必须通过全域名进行搜索，
-        // 但每次查找都输入全域名太麻烦了，可以通过配置域名的自动补齐规则予以简化；
-        // .addSearchDomain()
-        /*
-         * Set the name of this session. It will be displayed in system-managed dialogs
-         * and notifications. This is recommended not required.
-         */
-        // .setSession(getString(R.string.app_name))
-        ;
-        DebugLog.i("setMtu: %d\n", ProxyConfig.Instance.getMTU());
-        ProxyConfig.IPAddress ipAddress = ProxyConfig.Instance.getDefaultLocalIP();
-        LOCAL_IP = CommonMethods.ipStringToInt(ipAddress.Address);
-        // ipAddress.PrefixLength 默认值是 32 ，现只支持 IPv4 不支持 IPv6
-        builder.addAddress(ipAddress.Address, ipAddress.PrefixLength);
-        DebugLog.i("addAddress: %s/%d\n", ipAddress.Address, ipAddress.PrefixLength);
+
     }
 
     /**
@@ -214,10 +151,10 @@ public class FirewallVpnService extends VpnService implements Runnable {
             NatSessionManager.clearAllSession();
             AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
-            status = Status.STATUS_RUNNING ;
+            status = Status.STATUS_RUNNING;
             ProxyConfig.Instance.onVpnRunning(this);
             while (status == Status.STATUS_RUNNING) {
-                 startStream(establishVPN());
+                startStream(establishVPN());
             }
         } catch (InterruptedException e) {
             if (AppDebug.IS_DEBUG) {
@@ -231,7 +168,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
             DebugLog.e("VpnService run catch an exception %s.\n", e);
         } finally {
             DebugLog.i("VpnService terminated");
-            status = Status.STATUS_STOPPING ;
+            status = Status.STATUS_STOPPING;
             ProxyConfig.Instance.onVpnStopping(this);
             dispose();
         }
@@ -252,20 +189,30 @@ public class FirewallVpnService extends VpnService implements Runnable {
      * @return
      * @throws Exception
      */
-    private ParcelFileDescriptor establishVPN() throws Exception {
-        selectPackage = sp.getString(VPNConstants.DEFAULT_PACKAGE_ID, null);
+    private ParcelFileDescriptor establishVPN() {
+        selectPackage = sp.getString(DEFAULT_PACKAGE_ID, null);
         vpnStartTime = System.currentTimeMillis();
         lastVpnStartTimeFormat = TimeFormatUtil.formatYYMMDDHHMMSS(vpnStartTime);
         if (selectPackage != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.addAllowedApplication(selectPackage);
-            builder.addAllowedApplication(getPackageName());
+            try {
+                defaultBuilder.addAllowedApplication(selectPackage);
+                defaultBuilder.addAllowedApplication(getPackageName());
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         // 不调用 establish() 手机不会显示 vpn 图标
-        return builder.establish();
+        try {
+            parcelFileDescriptorTemp = defaultBuilder.establish();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            parcelFileDescriptorTemp = null;
+        }
+        return parcelFileDescriptorTemp;
     }
 
     private void startStream(ParcelFileDescriptor parcelFileDescriptor) throws Exception {
-        if(null == parcelFileDescriptor || true){
+        if (null == parcelFileDescriptor || true) {
             return;
         }
         int size = 0;
@@ -352,17 +299,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
             mVPNThread.interrupt();
         }
         stopSelf();
-        status = Status.STATUS_STOP ;
+        status = Status.STATUS_STOP;
         ProxyConfig.Instance.onVpnStop(this);
         VpnServiceHelper.onVpnServiceDestroy();
-    }
-
-    public boolean vpnRunningStatus() {
-        return IsRunning;
-    }
-
-    public void setVpnRunningStatus(boolean isRunning) {
-        IsRunning = isRunning;
     }
 
     /**
@@ -478,7 +417,4 @@ public class FirewallVpnService extends VpnService implements Runnable {
         return hasWrite;
     }
 
-    public Status getStatus() {
-        return status;
-    }
 }
