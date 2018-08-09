@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.io.File;
 import java.net.DatagramSocket;
@@ -75,8 +76,10 @@ public class VpnServiceHelper {
         if (isStart) {
             Intent intent = FirewallVpnService.prepare(context);
             if (intent == null) {
+                Log.e("NFL" , "这个 App 的 VPN 已经连接，或有其它 VPN 正在使用") ;
                 startVpnService(context);
             } else {
+                Log.e("NFL" , "准备申请 VPN 服务") ;
                 if (context instanceof Activity) {
                     ((Activity) context).startActivityForResult(intent, START_VPN_SERVICE_REQUEST_CODE);
                 }

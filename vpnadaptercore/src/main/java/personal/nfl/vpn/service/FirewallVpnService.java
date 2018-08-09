@@ -151,7 +151,6 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
             NatSessionManager.clearAllSession();
             AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
-            status = Status.STATUS_RUNNING;
             ProxyConfig.Instance.onVpnRunning(this);
             while (status == Status.STATUS_RUNNING) {
                 startStream(establishVPN());
@@ -203,7 +202,8 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
         }
         // 不调用 establish() 手机不会显示 vpn 图标
         try {
-            parcelFileDescriptorTemp = defaultBuilder.establish();
+//            parcelFileDescriptorTemp = defaultBuilder.establish();
+            status = Status.STATUS_RUNNING;
         } catch (IllegalStateException e) {
             e.printStackTrace();
             parcelFileDescriptorTemp = null;

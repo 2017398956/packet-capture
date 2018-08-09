@@ -118,6 +118,7 @@ public class VPNCaptureActivity extends BaseActivity {
         iv_back.setOnClickListener(onClickListener);
         iv_menu_01.setOnClickListener(onClickListener);
         tv_title.setOnClickListener(onClickListener);
+        pb_loading.setOnClickListener(onClickListener);
     }
 
     private void initData() {
@@ -325,11 +326,16 @@ public class VPNCaptureActivity extends BaseActivity {
             switch (v.getId()) {
                 case R.id.tv_title:
                     break;
+                case R.id.pb_loading:
+                    VpnServiceHelper.stopVpnService();
+                    break;
                 case R.id.iv_menu_01:
                     pb_loading.setVisibility(View.VISIBLE);
                     if (VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_AVAILABLE) {
+                        Log.e("NFL" , "准备打开 VPN") ;
                         startVPN();
                     } else if (VpnServiceHelper.getVpnServiceStatus() == FirewallVpnService.Status.STATUS_RUNNING) {
+                        Log.e("NFL" , "准备关闭 VPN") ;
                         closeVpn();
                     } else {
 
@@ -352,9 +358,11 @@ public class VPNCaptureActivity extends BaseActivity {
                 switch (integer) {
                     case 1:
                         iv_menu_01.setImageResource(R.mipmap.ic_stop);
+                        pb_loading.setVisibility(View.GONE);
                         break;
                     case 2:
                         iv_menu_01.setImageResource(R.mipmap.ic_start);
+                        pb_loading.setVisibility(View.GONE);
                         break;
                     case 3:
                         pb_loading.setVisibility(View.VISIBLE);
