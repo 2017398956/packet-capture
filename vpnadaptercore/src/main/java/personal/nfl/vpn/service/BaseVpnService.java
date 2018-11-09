@@ -95,6 +95,12 @@ public abstract class BaseVpnService extends VpnService {
         DebugLog.i("addAddress: %s/%d\n", ipAddress.Address, ipAddress.PrefixLength);
     }
 
+    @Override
+    public void onRevoke() {
+        super.onRevoke();
+        // TODO VPN 授权被撤销，可以在这提示下用户
+    }
+
     public boolean vpnRunningStatus() {
         return IsRunning;
     }
