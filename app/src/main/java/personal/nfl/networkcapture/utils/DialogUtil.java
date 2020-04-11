@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 
 import personal.nfl.networkcapture.R;
 import personal.nfl.networkcapture.cons.AppConstants;

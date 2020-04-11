@@ -9,7 +9,7 @@ import android.util.AttributeSet;
  * @author nfl
  */
 
-public class SmartTextView extends android.support.v7.widget.AppCompatTextView {
+public class SmartTextView extends androidx.appcompat.widget.AppCompatTextView {
 
 
     public SmartTextView(Context context) {

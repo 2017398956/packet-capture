@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.multidex.MultiDex;
+import androidx.multidex.MultiDex;
+
+import com.tencent.bugly.Bugly;
 
 import personal.nfl.networkcapture.common.util.BaseActivityLifecycleCallbacks;
 import personal.nfl.networkcapture.common.util.BuglyUtil;
@@ -64,7 +66,7 @@ public class MyApplication extends Application {
 
             }
         });
-        BuglyUtil.initBugly(context, BUGLY_APP_ID);
+        Bugly.init(getApplicationContext(), BUGLY_APP_ID , false);
         registerActivityLifecycleCallbacks(new BaseActivityLifecycleCallbacks());
         // 获取当前包名
         String packageName = getPackageName();

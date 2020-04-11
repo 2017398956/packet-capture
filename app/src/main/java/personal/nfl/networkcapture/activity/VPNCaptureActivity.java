@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import android.util.Log;
 import android.view.View;
 
@@ -25,6 +25,7 @@ import personal.nfl.networkcapture.fragment.CaptureFragment;
 import personal.nfl.networkcapture.fragment.HistoryFragment;
 import personal.nfl.networkcapture.fragment.SettingFragment;
 import personal.nfl.networkcapture.utils.DialogUtil;
+import personal.nfl.permission.annotation.GetPermissions4AndroidX;
 import personal.nfl.permission.annotation.GetPermissionsAuto;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
@@ -118,7 +119,7 @@ public class VPNCaptureActivity extends BaseActivity {
         pb_loading.setOnClickListener(onClickListener);
     }
 
-    @GetPermissionsAuto({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
+    @GetPermissions4AndroidX({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
     private void initData() {
         sharedPreferences = getSharedPreferences(VPN_SP_NAME, MODE_PRIVATE);
         selectPackage = sharedPreferences.getString(DEFAULT_PACKAGE_ID, null);

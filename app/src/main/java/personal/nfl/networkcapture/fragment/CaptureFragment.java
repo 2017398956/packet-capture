@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -34,7 +32,6 @@ import personal.nfl.networkcapture.common.widget.BaseFragment;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.VPNConstants;
 import personal.nfl.vpn.nat.NatSession;
-import personal.nfl.vpn.utils.ThreadProxy;
 import personal.nfl.vpn.utils.TimeFormatUtil;
 import personal.nfl.vpn.utils.VpnServiceHelper;
 
