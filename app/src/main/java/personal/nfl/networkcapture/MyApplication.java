@@ -22,11 +22,13 @@ public class MyApplication extends Application {
     public static final String BUGLY_APP_ID = "47a443716c";
     public static final String BUGLY_APP_KEY = "156fdd48-3b6d-4a64-9429-f7d004640b2c";
     private static Context context;
+    public static Application application ;
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = this;
+        application = this ;
         // PackageUtil.test(this);
         AbcPermission.install(this);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {

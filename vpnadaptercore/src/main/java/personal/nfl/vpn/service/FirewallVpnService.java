@@ -117,7 +117,6 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
         // Offset = ip 报文头部长度 + udp 报文头部长度 = 28
         mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
         DebugLog.i("New VPNService(%d)\n", ID);
-
     }
 
     /**
@@ -135,7 +134,6 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
 
     @Override
     public void run() {
-        status = Status.STATUS_PREPARING;
         ProxyConfig.Instance.onVpnPreparing(this);
         try {
             DebugLog.i("VPNService(%s) work thread is Running...\n", ID);
@@ -152,20 +150,22 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
             AppInfoCreator.getInstance().refreshSessionInfo();
             DebugLog.i("DnsProxy started.\n");
             ProxyConfig.Instance.onVpnRunning(this);
-            while (status == Status.STATUS_RUNNING) {
-                startStream(establishVPN());
-            }
+            status = Status.STATUS_RUNNING ;
+            startStream(establishVPN());
         } catch (InterruptedException e) {
             if (AppDebug.IS_DEBUG) {
                 e.printStackTrace();
             }
             DebugLog.e("VpnService run catch an exception %s.\n", e);
+            DebugLog.i("VpnService terminated");
+            status = Status.STATUS_STOPPING;
+            ProxyConfig.Instance.onVpnStopping(this);
+            dispose();
         } catch (Exception e) {
             if (AppDebug.IS_DEBUG) {
                 e.printStackTrace();
             }
             DebugLog.e("VpnService run catch an exception %s.\n", e);
-        } finally {
             DebugLog.i("VpnService terminated");
             status = Status.STATUS_STOPPING;
             ProxyConfig.Instance.onVpnStopping(this);
@@ -202,7 +202,7 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
         }
         // 不调用 establish() 手机不会显示 vpn 图标
         try {
-//            parcelFileDescriptorTemp = defaultBuilder.establish();
+            parcelFileDescriptorTemp = defaultBuilder.establish();
             status = Status.STATUS_RUNNING;
         } catch (IllegalStateException e) {
             e.printStackTrace();
@@ -212,13 +212,13 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
     }
 
     private void startStream(ParcelFileDescriptor parcelFileDescriptor) throws Exception {
-        if (null == parcelFileDescriptor || true) {
+        if (null == parcelFileDescriptor) {
             return;
         }
         int size = 0;
         mVPNOutputStream = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
         in = new FileInputStream(parcelFileDescriptor.getFileDescriptor());
-        while (size != -1 && IsRunning) {
+        while (size != -1) {
             boolean hasWrite = false;
             // 每次调用 FileInputStream.read 函数会读取一个IP数据包
             size = in.read(mPacket);
@@ -240,6 +240,7 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
                     mVPNOutputStream.write(bufferFromNetwork.array());
                 }
             }
+            // TODO 通过休眠的方式轮询网络访问不恰当，可能造成丢包并导致功耗过高，应该通过监听是否有网络访问来获取数据报
             Thread.sleep(10);
         }
         in.close();
@@ -249,16 +250,17 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
      * 死循环知道 VPN 准备好，理论上已经在 activity 中启动了 vpn ，这里不应该再 prepare 暂时去掉，看看效果
      */
     private void waitUntilPrepared() {
-//        while (prepare(this) != null) {
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException e) {
-//                if (AppDebug.IS_DEBUG) {
-//                    e.printStackTrace();
-//                }
-//                DebugLog.e("waitUntilPrepared catch an exception %s\n", e);
-//            }
-//        }
+        while (prepare(this) != null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                if (AppDebug.IS_DEBUG) {
+                    e.printStackTrace();
+                }
+                DebugLog.e("waitUntilPrepared catch an exception %s\n", e);
+            }
+        }
+        DebugLog.i("VpnService has prepared");
     }
 
     /**
@@ -270,6 +272,7 @@ public class FirewallVpnService extends BaseVpnService implements Runnable {
             status = Status.STATUS_AVAILABLE;
         }
         mVPNThread.start();
+        status = Status.STATUS_PREPARING;
     }
 
     /**

@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -80,9 +81,7 @@ public class CaptureFragment extends BaseFragment {
                 new IntentFilter(LocalVPNService.BROADCAST_VPN_STATE));*/
         ProxyConfig.Instance.registerVpnStatusListener(listener);
         initData();
-        if (VpnServiceHelper.vpnRunningStatus()) {
-            startTimer();
-        }
+        startTimer();
     }
 
     private void initData() {
@@ -101,11 +100,15 @@ public class CaptureFragment extends BaseFragment {
         cancelTimer();
     }
 
-    private void getDataAndRefreshView() {
+    private void refreshData() {
 
         allNetConnection.clear();
         // TODO 这里会获取大量 socket 信息，超过一定量要精简,而且前面的内容已经加载了一遍，这里还会重复加载
-        allNetConnection.addAll(VpnServiceHelper.getAllSession());
+        List<NatSession> temp = VpnServiceHelper.getAllSession();
+        if (null != temp && temp.size() > 0) {
+            allNetConnection.addAll(temp);
+        }
+        Log.i("NFL", "抓包记录的个数：" + allNetConnection.size());
         //
         if (allNetConnection != null) {
             iterator = allNetConnection.iterator();
@@ -126,44 +129,29 @@ public class CaptureFragment extends BaseFragment {
                 }
             }
         }
-        connectionAdapter.notifyDataSetChanged();
     }
 
     /**
      * 每隔 1s 读取一次抓包信息
      */
     private void startTimer() {
-        Flowable.interval(1000 , TimeUnit.MILLISECONDS).doOnNext(new Consumer<Long>() {
-            @Override
-            public void accept(Long aLong) throws Exception {
-                getDataAndRefreshView();
-            }
-        }).observeOn(AndroidSchedulers.mainThread()) ;
-        disposeCapture = Observable
-                .create(new ObservableOnSubscribe<Integer>() {
+        disposeCapture = Flowable.interval(2000, TimeUnit.MILLISECONDS)
+                // .observeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(new Consumer<Long>() {
                     @Override
-                    public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
-                        int i = 0;
-                        while (true) {
-                            i++;
-                            emitter.onNext(i);
-                            try{
-                                Thread.sleep(1000);
-                            }catch (InterruptedException e){
-
-                            }
-
-                        }
+                    public void accept(Long aLong) throws Exception {
+                        refreshData();
                     }
                 })
-                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(new Consumer<Integer>() {
+                .doAfterNext(new Consumer<Long>() {
                     @Override
-                    public void accept(Integer integer) throws Exception {
-
+                    public void accept(Long aLong) throws Exception {
+                        connectionAdapter.notifyDataSetChanged();
                     }
-                }).subscribe();
+                })
+                .subscribe();
     }
 
     private void cancelTimer() {
@@ -205,17 +193,16 @@ public class CaptureFragment extends BaseFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (allNetConnection == null) {
-                return;
-            }
-            if (position > allNetConnection.size() - 1) {
+            if (allNetConnection == null || position > allNetConnection.size() - 1) {
                 return;
             }
             NatSession connection = allNetConnection.get(position);
             if (connection.isHttpsSession) {
-                return;
+                // TODO HTTPS 待解决
+                // return;
             }
             if (!NatSession.TCP.equals(connection.type)) {
+                // TODO 不是 TCP 协议的话暂不解决
                 return;
             }
             String dir = VPNConstants.DATA_DIR

@@ -43,6 +43,7 @@
         android:layout_below="@id/tv_net_size"
         android:layout_marginTop="2dp"
         android:text="@string/ssl"
+        tools:visibility="visible"
         android:textColor="@android:color/holo_red_light"
         android:visibility="invisible" />
 

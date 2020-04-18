@@ -1,6 +1,7 @@
 package personal.nfl.vpn.service;
 
 import android.net.VpnService;
+import android.widget.Toast;
 
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.utils.CommonMethods;
@@ -99,14 +100,11 @@ public abstract class BaseVpnService extends VpnService {
     public void onRevoke() {
         super.onRevoke();
         // TODO VPN 授权被撤销，可以在这提示下用户
+        Toast.makeText(this, "连接已中断", Toast.LENGTH_SHORT).show();
     }
 
-    public boolean vpnRunningStatus() {
-        return IsRunning;
-    }
-
-    public void setVpnRunningStatus(boolean isRunning) {
-        IsRunning = isRunning;
+    public boolean isRunning() {
+        return status == Status.STATUS_RUNNING;
     }
 
     public Status getStatus() {

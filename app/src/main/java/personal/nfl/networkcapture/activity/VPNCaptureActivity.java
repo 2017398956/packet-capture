@@ -26,7 +26,6 @@ import personal.nfl.networkcapture.fragment.HistoryFragment;
 import personal.nfl.networkcapture.fragment.SettingFragment;
 import personal.nfl.networkcapture.utils.DialogUtil;
 import personal.nfl.permission.annotation.GetPermissions4AndroidX;
-import personal.nfl.permission.annotation.GetPermissionsAuto;
 import personal.nfl.vpn.ProxyConfig;
 import personal.nfl.vpn.ProxyConfig.VpnStatusListener;
 import personal.nfl.vpn.service.FirewallVpnService;
@@ -73,7 +72,7 @@ public class VPNCaptureActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        iv_menu_01.setImageResource(VpnServiceHelper.vpnRunningStatus() ? R.mipmap.ic_stop : R.mipmap.ic_start);
+        iv_menu_01.setImageResource(VpnServiceHelper.vpnIsRunning() ? R.mipmap.ic_stop : R.mipmap.ic_start);
     }
 
     @Override
@@ -111,7 +110,6 @@ public class VPNCaptureActivity extends BaseActivity {
 
     private void setListeners() {
         iv_back.setImageResource(R.drawable.switch_device_selector);
-        iv_menu_01.setImageResource(R.mipmap.ic_start);
         iv_menu_01.setVisibility(View.VISIBLE);
         iv_back.setOnClickListener(onClickListener);
         iv_menu_01.setOnClickListener(onClickListener);

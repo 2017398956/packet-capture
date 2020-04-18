@@ -62,9 +62,9 @@ public class VpnServiceHelper {
         return false;
     }
 
-    public static boolean vpnRunningStatus() {
+    public static boolean vpnIsRunning() {
         if (sVpnService != null) {
-            return sVpnService.vpnRunningStatus();
+            return sVpnService.isRunning();
         }
         return false;
     }
@@ -124,8 +124,10 @@ public class VpnServiceHelper {
             throw new IllegalArgumentException("VpnServiceHelper : context cannot be null");
         }
         if (null == sVpnService) {
+            Log.i("NFL" , "代理服务还未创建，");
             context.startService(new Intent(context, FirewallVpnService.class));
         } else if (sVpnService.getStatus() == BaseVpnService.Status.STATUS_AVAILABLE) {
+            Log.i("NFL" , "代理服务已创建，重新启动服务");
             sVpnService.startVPN();
         }
     }
