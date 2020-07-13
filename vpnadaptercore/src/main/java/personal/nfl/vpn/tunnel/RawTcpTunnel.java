@@ -7,7 +7,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 /**
- * Created by zengzheying on 15/12/30.
+ *
  */
 public class RawTcpTunnel extends TcpTunnel {
 
@@ -17,7 +17,6 @@ public class RawTcpTunnel extends TcpTunnel {
 
 	public RawTcpTunnel(InetSocketAddress serverAddress, Selector selector, short portKey) throws IOException {
 		super(serverAddress, selector, portKey);
-
 	}
 
 	@Override
@@ -31,17 +30,14 @@ public class RawTcpTunnel extends TcpTunnel {
 	}
 
 	@Override
-	protected void beforeSend(ByteBuffer buffer) throws Exception {
-
+	protected void beforeSend(ByteBuffer buffer , boolean isHttpsRequest) throws Exception {
 	}
 
 	@Override
-	protected void afterReceived(ByteBuffer buffer) throws Exception {
-
+	protected void afterReceived(ByteBuffer buffer , boolean isHttpsRequest) throws Exception {
 	}
 
 	@Override
 	protected void onDispose() {
-
 	}
 }

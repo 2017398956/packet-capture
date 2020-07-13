@@ -24,7 +24,7 @@ public class ProxyConfig {
 
     public String getSessionName() {
         if (mSessionName == null) {
-            mSessionName = "Easy Firewall";
+            mSessionName = "Default Firewall";
         }
         return mSessionName;
     }

@@ -1,17 +1,15 @@
 package personal.nfl.vpn.tcpip;
 
+import android.util.Log;
+
 import personal.nfl.vpn.utils.CommonMethods;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class TCPHeader {
 
 
 	/**
-	 * ＴＣＰ报头格式
-	 * ０                                                      １５ １６
-	 * ３１
+	 * ＴＣＰ报头格式，每行 4 个字节，前 20 个字节为固定长度
+	 * ０                                                      １５ １６													    31
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 * ｜               源端口号（ｓｏｕｒｃｅ　ｐｏｒｔ）           　｜       　目的端口号（ｄｅｓｔｉｎａｔｉｏｎ　ｐｏｒｔ）     ｜
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
@@ -25,12 +23,13 @@ public class TCPHeader {
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 * ｜              校验和（ｃｈｅｃｋｓｕｍ）                     ｜           紧急指针（ｕｒｇｅｎｔ　ｐｏｉｎｔｅｒ）       ｜
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
-	 * ｜                                                选项＋填充（０或多个３２位字）                                    　｜
+	 * ｜                                                选项＋填充（０或多个３２位字，最多 40 个字节）                                    　｜
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 * ｜                                                   数据（０或多个字节）                                            |
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 **/
 
+	// 由于标识位是顺序排列的且不是当前状态时置为 0 ，所以可以把所有的标识位作为一个整体来读取，这里是其对应的值
 	public static final int FIN = 1;
 	public static final int SYN = 2;
 	public static final int RST = 4;
@@ -38,6 +37,7 @@ public class TCPHeader {
 	public static final int ACK = 16;
 	public static final int URG = 32;
 
+	// 这里的序号都是字节位置
 	static final short offset_src_port = 0; // 16位源端口
 	static final short offset_dest_port = 2; // 16位目的端口
 	static final int offset_seq = 4; //32位序列号
@@ -48,14 +48,22 @@ public class TCPHeader {
 	static final short offset_crc = 16; //16位校验和
 	static final short offset_urp = 18; //16位紧急偏移量
 
+	// ip 报文数据
 	public byte[] mData;
+	// tcp 报文相对于 ip 报文的偏移量（单位：字节），一般是 20 ，在接收到 ip 报文后要再次设置
 	public int mOffset;
+
 
 	public TCPHeader(byte[] data, int offset) {
 		mData = data;
 		mOffset = offset;
 	}
 
+	/**
+	 * 去掉低 4 位后是 tcp 报文的头部长度，每一个代表 4 个字节
+	 * 所以共 1111（二进制） * 4 = 60 个字节
+	 * @return
+	 */
 	public int getHeaderLength() {
 		int lenres = mData[mOffset + offset_lenres] & 0xFF;
 		return (lenres >> 4) * 4;

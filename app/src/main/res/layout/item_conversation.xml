@@ -54,6 +54,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:visibility="gone"
-            tools:src="@drawable/app_icon" />
+            tools:src="@mipmap/ic_launcher"
+            tools:visibility="visible"/>
     </RelativeLayout>
 </RelativeLayout>

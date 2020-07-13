@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import io.reactivex.Flowable;
 import personal.nfl.networkcapture.R;
 import personal.nfl.networkcapture.adapter.DetailAdapter;
 import personal.nfl.networkcapture.common.widget.BaseActivity;
@@ -47,27 +48,22 @@ public class PacketDetailActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivity_packet_detail);
         setActionBarTitle(R.string.socket_detail);
+        initView();
+        initData();
+        refreshView();
+    }
+
+    private void initView(){
         lv_detail = findViewById(R.id.lv_detail);
-        adapter = new DetailAdapter(context, data);
-
-        /**
-         * 为了加载大文件时不卡顿，这里不能直接调用 setAdapter 再后面 notifyDataSetChanged
-         * 应该用的时候再设置。
-         * TODO 这里先将刷新放在 onResume 中，测试导致这种情况的原因
-         */
-        lv_detail.setAdapter(adapter);
-
         pg = findViewById(R.id.pg);
+    }
+
+    private void initData(){
+        adapter = new DetailAdapter(context, data);
+        lv_detail.setAdapter(adapter);
         socketDataDir = getIntent().getStringExtra(CONVERSATION_DATA);
         sp = getSharedPreferences(AppConstants.DATA_SAVE, MODE_PRIVATE);
         sp.edit().putBoolean(AppConstants.HAS_FULL_USE_APP, true).apply();
-//        refreshView();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        refreshView();
     }
 
     private void refreshView() {
@@ -99,7 +95,6 @@ public class PacketDetailActivity extends BaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-//                        lv_detail.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
                         pg.setVisibility(View.GONE);
                         changeNoDataView(data);
@@ -108,7 +103,6 @@ public class PacketDetailActivity extends BaseActivity {
             }
         });
     }
-
 
     public static void startActivity(Activity context, String dir) {
         Intent intent = new Intent(context, PacketDetailActivity.class);

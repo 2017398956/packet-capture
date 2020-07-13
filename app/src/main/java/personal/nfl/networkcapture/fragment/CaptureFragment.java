@@ -108,8 +108,6 @@ public class CaptureFragment extends BaseFragment {
         if (null != temp && temp.size() > 0) {
             allNetConnection.addAll(temp);
         }
-        Log.i("NFL", "抓包记录的个数：" + allNetConnection.size());
-        //
         if (allNetConnection != null) {
             iterator = allNetConnection.iterator();
             // TODO 为了提高性能，这里应该在配置改变的时候利用通知，或共享变量来处理，而不是每次都从 sp 中获取

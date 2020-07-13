@@ -49,6 +49,7 @@ public class IPHeader {
 	static final int offset_op_pad = 20; //20：选项 + 填充
 
 	public byte[] mData;
+	// ip 报文的偏移量，一般为 0
 	public int mOffset;
 
 	public IPHeader(byte[] data, int offset) {
@@ -69,6 +70,12 @@ public class IPHeader {
 		return this.getTotalLength() - this.getHeaderLength();
 	}
 
+	/**
+	 * 首部长度，mData[mOffset + offset_ver_ihl] & 0x0F 只保留后 4 位
+	 * (mData[mOffset + offset_ver_ihl] & 0x0F) * 4 乘 4 表示每位代表 4 个字节，
+	 * 共 1111（二进制） * 4 = 60 个字节，所以，ip 头部最多 60 个字节
+	 * @return
+	 */
 	public int getHeaderLength() {
 		return (mData[mOffset + offset_ver_ihl] & 0x0F) * 4;
 	}

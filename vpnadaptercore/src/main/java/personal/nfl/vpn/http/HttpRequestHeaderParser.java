@@ -2,13 +2,12 @@ package personal.nfl.vpn.http;
 
 import android.text.TextUtils;
 
+import java.util.Locale;
 
 import personal.nfl.vpn.nat.NatSession;
 import personal.nfl.vpn.utils.AppDebug;
 import personal.nfl.vpn.utils.CommonMethods;
 import personal.nfl.vpn.utils.DebugLog;
-
-import java.util.Locale;
 
 /**
  * Created by zengzheying on 15/12/30.
@@ -18,20 +17,14 @@ public class HttpRequestHeaderParser {
     public static void parseHttpRequestHeader(NatSession session, byte[] buffer, int offset, int count) {
         try {
             switch (buffer[offset]) {
-                //GET
-                case 'G':
-                    //HEAD
-                case 'H':
-                    //POST, PUT
-                case 'P':
-                    //DELETE
-                case 'D':
-                    //OPTIONS
-                case 'O':
-                    //TRACE
-                case 'T':
-                    //CONNECT
-                case 'C':
+
+                case 'G': //GET
+                case 'H': //HEAD
+                case 'P': //POST, PUT
+                case 'D': //DELETE
+                case 'O': //OPTIONS
+                case 'T': //TRACE
+                case 'C': //CONNECT
                     getHttpHostAndRequestUrl(session, buffer, offset, count);
                     break;
                 //SSL
@@ -54,6 +47,7 @@ public class HttpRequestHeaderParser {
         session.isHttp = true;
         session.isHttpsSession = false;
         String headerString = new String(buffer, offset, count);
+        // Log.i("NFL" , "用户传送的网络数据：" + headerString) ;
         String[] headerLines = headerString.split("\\r\\n");
         String host = getHttpHost(headerLines);
         if (!TextUtils.isEmpty(host)) {
@@ -62,15 +56,26 @@ public class HttpRequestHeaderParser {
         paresRequestLine(session, headerLines[0]);
     }
 
+    /**
+     * @param buffer
+     * @param offset
+     * @param count
+     * @return 网络访问 host 但不包括协议和端口
+     */
     public static String getRemoteHost(byte[] buffer, int offset, int count) {
         String headerString = new String(buffer, offset, count);
         String[] headerLines = headerString.split("\\r\\n");
         return getHttpHost(headerLines);
     }
 
+    /**
+     * @param headerLines
+     * @return ip 报文中的 host 地址，但不包括端口
+     */
     public static String getHttpHost(String[] headerLines) {
         for (int i = 1; i < headerLines.length; i++) {
             String[] nameValueStrings = headerLines[i].split(":");
+            // IP 报文中 host 如果不是 80 端口会有 2 个 “：”，例如 Host: 192.168.100.103:901
             if (nameValueStrings.length == 2 || nameValueStrings.length == 3) {
                 String name = nameValueStrings[0].toLowerCase(Locale.ENGLISH).trim();
                 String value = nameValueStrings[1].trim();
@@ -82,10 +87,18 @@ public class HttpRequestHeaderParser {
         return null;
     }
 
+    /**
+     * 解析网络请求地址，但 session.requestUrl 中不包含端口信息
+     *
+     * @param session
+     * @param requestLine
+     */
     public static void paresRequestLine(NatSession session, String requestLine) {
         String[] parts = requestLine.trim().split(" ");
         if (parts.length == 3) {
+            // 网络访问方式 GET，POST 等
             session.method = parts[0];
+            // url 中带的参数，例如：访问的是 http://192.168.100.103:901/?a=2 那么 url 就是 /?a=2
             String url = parts[1];
             session.pathUrl = url;
             if (url.startsWith("/")) {
@@ -98,7 +111,6 @@ public class HttpRequestHeaderParser {
                 } else {
                     session.requestUrl = "http://" + url;
                 }
-
             }
         }
     }

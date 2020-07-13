@@ -1,13 +1,7 @@
 package personal.nfl.vpn.tunnel;
 
 
-import personal.nfl.vpn.KeyHandler;
-import personal.nfl.vpn.nat.NatSessionManager;
-import personal.nfl.vpn.service.BaseVpnService;
-import personal.nfl.vpn.service.FirewallVpnService;
-import personal.nfl.vpn.utils.AppDebug;
-import personal.nfl.vpn.utils.DebugLog;
-import personal.nfl.vpn.utils.VpnServiceHelper;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,43 +12,59 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import personal.nfl.vpn.KeyHandler;
+import personal.nfl.vpn.nat.NatSessionManager;
+import personal.nfl.vpn.service.BaseVpnService;
+import personal.nfl.vpn.utils.AppDebug;
+import personal.nfl.vpn.utils.DebugLog;
+import personal.nfl.vpn.utils.VpnServiceHelper;
+
 /**
- * Created by zengzheying on 15/12/29.
+ * Created by nfl
  */
 public abstract class TcpTunnel implements KeyHandler {
 
     public static long sessionCount;
     protected InetSocketAddress mDestAddress;
-    /**
-     * 自己的Channel
-     */
-
+    // 用户发送的数据经改造后变为发送到 tcp 服务器的 Channel
     private SocketChannel mInnerChannel;
     /**
      * 发送数据缓存
      */
-
     private Selector mSelector;
-    /**
-     * http报文
-     */
+    // 是否是 https 访问
     private boolean isHttpsRequest = false;
-    /**
-     * 与外网的通信两个Tunnel负责，一个负责Apps与TCP代理服务器的通信，一个负责TCP代理服务器
-     * 与外网服务器的通信，Apps与外网服务器的数据交换靠这两个Tunnel来进行
-     */
+    // 与外网的通信两个 Tunnel 负责，一个负责 Apps与 TCP代理服务器 的通信，一个负责 TCP代理服务器
+    // 与外网服务器的通信，Apps与外网服务器的数据交换靠这两个Tunnel来进行；这两个 tunnel 互为兄弟，都要把
+    // mBrotherTunnel 赋值给对方
     private TcpTunnel mBrotherTunnel;
     private boolean mDisposed;
+    // 用于保存 tcp 服务器到目标服务器的连接信息
     private InetSocketAddress mServerEP;
+    // 目标服务器的端口
     short portKey;
     ConcurrentLinkedQueue<ByteBuffer> needWriteData = new ConcurrentLinkedQueue<>();
 
+    /**
+     * 一般用于创建用户发送到 tcp 服务器的 TcpTunnel
+     *
+     * @param innerChannel
+     * @param selector
+     */
     public TcpTunnel(SocketChannel innerChannel, Selector selector) {
         mInnerChannel = innerChannel;
         mSelector = selector;
         sessionCount++;
     }
 
+    /**
+     * 一般用于创建 tcp 服务器到目标网络的 TcpTunnel
+     *
+     * @param serverAddress
+     * @param selector
+     * @param portKey
+     * @throws IOException
+     */
     public TcpTunnel(InetSocketAddress serverAddress, Selector selector, short portKey) throws IOException {
         SocketChannel innerChannel = SocketChannel.open();
         innerChannel.configureBlocking(false);
@@ -65,43 +75,22 @@ public abstract class TcpTunnel implements KeyHandler {
         sessionCount++;
     }
 
-    @Override
-    public void onKeyReady(SelectionKey key) {
-        if (key.isReadable()) {
-            onReadable(key);
-        } else if (key.isWritable()) {
-            onWritable(key);
-        } else if (key.isConnectable()) {
-            onConnectable();
-        }
-    }
-
     /**
      * 方法调用次序：
-     * connect() -> onConnectable() -> onConnected()[子类实现]
+     * connect() -> onKeyReady() -> onConnectable() -> onConnected()[子类实现] -> onTunnelEstablished
      * beginReceived() ->  onReadable() -> afterReceived()[子类实现]
      */
 
-    protected abstract void onConnected() throws Exception;
-
-    protected abstract boolean isTunnelEstablished();
-
-    protected abstract void beforeSend(ByteBuffer buffer) throws Exception;
-
-    protected abstract void afterReceived(ByteBuffer buffer) throws Exception;
-
-    protected abstract void onDispose();
-
-    public void setBrotherTunnel(TcpTunnel brotherTunnel) {
-        this.mBrotherTunnel = brotherTunnel;
-    }
-
-
+    /**
+     * 用于本地 tcp 服务器连接到 目标服务器，这里不需要再走 vpn 了，因为已经对用户发送的数据修改过了
+     * @param destAddress
+     * @throws Exception
+     */
     public void connect(InetSocketAddress destAddress) throws Exception {
         //保护socket不走VPN
         if (VpnServiceHelper.protect(mInnerChannel.socket())) {
             mDestAddress = destAddress;
-            //注册连接事件
+            // 注册连接事件，SelectionKey 会绑定本地tcp服务器到目标服务器的链接，而不会绑定用户app到本地tcp服务器的链接
             mInnerChannel.register(mSelector, SelectionKey.OP_CONNECT, this);
             mInnerChannel.connect(mServerEP);
             DebugLog.i("Connecting to %s", mServerEP);
@@ -110,10 +99,26 @@ public abstract class TcpTunnel implements KeyHandler {
         }
     }
 
+    @Override
+    public void onKeyReady(SelectionKey key) {
+        if (key.isConnectable()) {
+            onConnectable();
+            Log.i("NFL", getClass().getName() + "key status:key.isConnectable()");
+        } else if (key.isReadable()) {
+            onReadable(key);
+            Log.i("NFL", getClass().getName() + "key status:key.isReadable()");
+        } else if (key.isWritable()) {
+            onWritable(key);
+            Log.i("NFL", getClass().getName() + "key status:key.isWritable()");
+        }
+    }
+
     public void onConnectable() {
         try {
+            // 校验正在进行套接字连接的 SocketChannel 是否已经完成连接
+            //  is true if, and only if, this channel's socket is now connected
             if (mInnerChannel.finishConnect()) {
-                //通知子类TCP已连接，子类可以根据协议实现握手等
+                // 通知子类 TCP 已连接，子类可以根据协议实现握手等
                 onConnected();
                 DebugLog.i("Connected to %s", mServerEP);
             } else {
@@ -129,6 +134,19 @@ public abstract class TcpTunnel implements KeyHandler {
         }
     }
 
+    protected abstract void onConnected() throws Exception;
+
+    /**
+     * 通过兄弟Tunnel开始接收，那么，tcp服务器将会接收到 用户到tcp服务器和tcp服务器到目标服务器的数据，
+     * 并且为这两个访问都注册了tunnel
+     *
+     * @throws Exception
+     */
+    protected void onTunnelEstablished() throws Exception {
+        this.beginReceived(); //开始接收数据
+        mBrotherTunnel.beginReceived(); //兄弟也开始接收数据吧
+    }
+
     protected void beginReceived() throws Exception {
         if (mInnerChannel.isBlocking()) {
             mInnerChannel.configureBlocking(false);
@@ -138,6 +156,10 @@ public abstract class TcpTunnel implements KeyHandler {
         mInnerChannel.register(mSelector, SelectionKey.OP_READ, this);
     }
 
+    /**
+     * 可以读取后，发送给兄弟 tunnel
+     * @param key
+     */
     public void onReadable(SelectionKey key) {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(BaseVpnService.MUTE_SIZE);
@@ -146,12 +168,9 @@ public abstract class TcpTunnel implements KeyHandler {
             if (bytesRead > 0) {
                 buffer.flip();
                 //先让子类处理，例如解密数据
-                afterReceived(buffer);
-
+                afterReceived(buffer, isHttpsRequest);
                 sendToBrother(key, buffer);
-
             } else if (bytesRead < 0) {
-
                 this.dispose();
             }
         } catch (Exception ex) {
@@ -163,22 +182,18 @@ public abstract class TcpTunnel implements KeyHandler {
         }
     }
 
-
-
     protected void sendToBrother(SelectionKey key, ByteBuffer buffer) throws Exception {
         //将读到的数据，转发给兄弟
         if (isTunnelEstablished() && buffer.hasRemaining()) {
             //发送之前，先让子类处理，例如做加密等。
-            //    mBrotherTunnel.beforeSend(buffer);
+            mBrotherTunnel.beforeSend(buffer, isHttpsRequest);
             mBrotherTunnel.getWriteDataFromBrother(buffer);
-
         }
     }
 
     private void getWriteDataFromBrother(ByteBuffer buffer) {
         //如果没有数据尝试直接写
         if (buffer.hasRemaining() && needWriteData.size() == 0) {
-
             int writeSize = 0;
             try {
                 writeSize = write(buffer);
@@ -190,6 +205,7 @@ public abstract class TcpTunnel implements KeyHandler {
                 return;
             }
         }
+        // 将指定元素插入此队列的尾部。
         needWriteData.offer(buffer);
         try {
             mSelector.wakeup();
@@ -199,21 +215,6 @@ public abstract class TcpTunnel implements KeyHandler {
         }
     }
 
-    protected int write(ByteBuffer buffer) throws Exception {
-        int byteSendSum = 0;
-        beforeSend(buffer);
-        while (buffer.hasRemaining()) {
-            int byteSent = mInnerChannel.write(buffer);
-            byteSendSum += byteSent;
-            if (byteSent == 0) {
-                break; //不能再发送了，终止循环
-            }
-        }
-        return byteSendSum;
-
-    }
-
-
     public void onWritable(SelectionKey key) {
         try {
             //发送之前，先让子类处理，例如做加密等
@@ -221,7 +222,6 @@ public abstract class TcpTunnel implements KeyHandler {
             if (mSendRemainBuffer == null) {
                 return;
             }
-
             write(mSendRemainBuffer);
             if (needWriteData.size() == 0) {
                 try {
@@ -230,22 +230,31 @@ public abstract class TcpTunnel implements KeyHandler {
                 } catch (ClosedChannelException e) {
                     e.printStackTrace();
                 }
-
             }
         } catch (Exception ex) {
             if (AppDebug.IS_DEBUG) {
                 ex.printStackTrace(System.err);
             }
-
             DebugLog.e("onWritable catch an exception: %s", ex);
-
             this.dispose();
         }
     }
 
-    protected void onTunnelEstablished() throws Exception {
-        this.beginReceived(); //开始接收数据
-        mBrotherTunnel.beginReceived(); //兄弟也开始接收数据吧
+    protected int write(ByteBuffer buffer) throws Exception {
+        int byteSendSum = 0;
+        beforeSend(buffer, isHttpsRequest);
+        while (buffer.hasRemaining()) {
+            int byteSent = mInnerChannel.write(buffer);
+            byteSendSum += byteSent;
+            if (byteSent == 0) {
+                break; //不能再发送了，终止循环
+            }
+        }
+        return byteSendSum;
+    }
+
+    public void setBrotherTunnel(TcpTunnel brotherTunnel) {
+        this.mBrotherTunnel = brotherTunnel;
     }
 
     public void dispose() {
@@ -286,6 +295,14 @@ public abstract class TcpTunnel implements KeyHandler {
     public boolean isHttpsRequest() {
         return isHttpsRequest;
     }
+
+    protected abstract boolean isTunnelEstablished();
+
+    protected abstract void beforeSend(ByteBuffer buffer, boolean isHttpsRequest) throws Exception;
+
+    protected abstract void afterReceived(ByteBuffer buffer, boolean isHttpsRequest) throws Exception;
+
+    protected abstract void onDispose();
 
 
 }

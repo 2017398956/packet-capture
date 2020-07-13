@@ -34,7 +34,7 @@ public class SaveDataFileParser {
     private static final String URLENCODED = "urlencoded";
 
     /**
-     * 参照okhttp对请求和响应进行解析
+     * 参照 okhttp 对请求和响应进行解析
      *
      * @param childFile
      * @return
@@ -123,7 +123,7 @@ public class SaveDataFileParser {
 
     }
 
-    private static String getGzipStr(BufferedSource buffer) {
+    public static String getGzipStr(BufferedSource buffer) {
         GzipSource gzipSource = new GzipSource(buffer);
         BufferedSource gzipBuffer = Okio.buffer(gzipSource);
         byte[] bytes = null;

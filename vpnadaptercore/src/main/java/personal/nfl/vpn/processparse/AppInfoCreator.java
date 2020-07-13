@@ -25,11 +25,6 @@ public class AppInfoCreator {
         VPNLog.e(TAG , "PortHostService 新建成功");
     }
 
-    /**
-     * 不能保证返回结果不是 null
-     *
-     * @return
-     */
     public static AppInfoCreator getInstance() {
         return instance;
     }

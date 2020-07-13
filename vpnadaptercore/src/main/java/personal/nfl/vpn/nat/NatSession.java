@@ -17,9 +17,11 @@ public class NatSession implements Serializable {
     public String type;
     public String ipAndPort;
     public int remoteIP;
+    // 要访问地址的端口号
     public short remotePort;
     public String remoteHost;
     public short localPort;
+    // 已经上传了多少数据（IP 数据报 或 TCP 数据报 的头消息不包括在内）
     public int bytesSent;
     /**
      * 记录当前网络会话中已经发送了多少个网络包
@@ -29,6 +31,8 @@ public class NatSession implements Serializable {
     public long receivePacketNum;
     public long lastRefreshTime;
     public boolean isHttpsSession;
+    // 用户意图访问的 url ，但不包括端口号，例如：用户访问的是 http://192.168.100.103:901/?a=2 那么这里会
+    // 变成 http://192.168.100.103/?a=2
     public String requestUrl;
     public String pathUrl;
     public String method;
